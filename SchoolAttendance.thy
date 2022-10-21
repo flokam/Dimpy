@@ -30,16 +30,21 @@ This enables the unique security
 labelling of data within the system additionally taking the ownership into 
 account.\<close>
 type_synonym dob = nat
+datatype gender = male | female 
 datatype ethnicity = black |  white | asian
-type_synonym data = \<open>location \<times> nat \<times> dob \<times> ethnicity\<close>
+datatype disadvantaged = sen | fsm | none
+datatype year = nursery | reception | year1 | year2 | year3 | year4
+  | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
+type_synonym data = \<open>location \<times> gender \<times> year \<times> ethnicity\<close>
 type_synonym dlm = \<open>actor \<times> actor set\<close>
+type_synonym absence = nat
 
 datatype igraph = Lgraph 
                     (gra: \<open>(location \<times> location)set\<close>)
                     (agra: \<open>location \<Rightarrow> identity set\<close>)
                     (dgra: \<open> identity \<Rightarrow> dlm \<times> data\<close>)
                     (bb: \<open> data \<Rightarrow> bool\<close>)
-                    (requests: \<open>(identity \<times> bool option)set\<close>)
+                    (attendance: \<open>(identity \<times> absence)set\<close>)
 
 
 end
