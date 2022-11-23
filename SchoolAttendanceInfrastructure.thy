@@ -1,7 +1,7 @@
 section \<open>Infrastructures for School Attendance\<close>
 text \<open>This theory provides the adaptation of the IIIf for School attendance.\<close>
 subsection \<open>Actors, actions, and data labels\<close>
-theory SchoolAttendance
+theory SchoolAttendanceInfrastructure
   imports Refinement
 begin
 datatype action = get | move | eval | put
@@ -32,7 +32,9 @@ account.\<close>
 type_synonym dob = nat
 datatype gender = male | female 
 datatype ethnicity = black |  white | asian
-datatype disadvantaged = sen | fsm | none
+(* special educational needs, free school meal, education health and care,
+   ... *)
+datatype disadvantaged = sen | fsm | ehc | csc | none
 datatype year = nursery | reception | year1 | year2 | year3 | year4
   | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
 type_synonym data = \<open>location \<times> gender \<times> year \<times> ethnicity\<close>
