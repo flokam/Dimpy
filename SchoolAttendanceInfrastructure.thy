@@ -34,10 +34,10 @@ datatype gender = male | female
 datatype ethnicity = black |  white | asian
 (* special educational needs, free school meal, education health and care,
    ... *)
-datatype disadvantaged = sen | fsm | ehc | csc | none
+datatype disadvantaged = sen | fsm | ehc | csc 
 datatype year = nursery | reception | year1 | year2 | year3 | year4
   | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
-type_synonym data = \<open>location \<times> gender \<times> year \<times> ethnicity\<close>
+type_synonym data = \<open>location \<times> gender \<times> year \<times> ethnicity \<times> disadvantaged set\<close>
 type_synonym dlm = \<open>actor \<times> actor set\<close>
 type_synonym absence = nat
 
@@ -46,7 +46,141 @@ datatype igraph = Lgraph
                     (agra: \<open>location \<Rightarrow> identity set\<close>)
                     (dgra: \<open> identity \<Rightarrow> dlm \<times> data\<close>)
                     (bb: \<open> data \<Rightarrow> bool\<close>)
-                    (attendance: \<open>(identity \<times> absence)set\<close>)
+                    (attendance: \<open>(identity \<times> absence set)set\<close>)
 
+datatype infrastructure = 
+         Infrastructure (graphI: \<open>igraph\<close>)
+                        (delta: \<open>[igraph, location] \<Rightarrow> policy set\<close>)
+
+thm igraph.sel
+
+lemma agra_simps: \<open>agra (Lgraph g a d b e) = a\<close>
+ by (rule SchoolAttendanceInfrastructure.igraph.sel(2))
+
+definition nodes :: \<open>igraph \<Rightarrow> location set\<close>
+where \<open>nodes g == { x. (\<exists> y. ((x,y): gra g) | ((y,x): gra g))}\<close>
+
+definition actors_graph :: "igraph \<Rightarrow> identity set"  
+where  "actors_graph g == {x. ? y. y : nodes g \<and> x \<in> (agra g y)}"
+
+lemma graphI_simps[simp]: \<open>graphI (Infrastructure g d) = g\<close>
+  by (rule infrastructure.sel(1))
+
+lemma delta_simps[simp]: \<open>delta (Infrastructure g d) = d\<close>
+  by (rule infrastructure.sel(2))
+text \<open>Predicates and projections for the labels to encode their meaning.\<close>
+definition owner :: "dlm * data \<Rightarrow> actor" where "owner d \<equiv> fst(fst d)"
+definition owns :: "[igraph, location, actor, dlm * data] \<Rightarrow> bool"
+  where "owns G l a d \<equiv> owner d = a"
+definition readers :: "dlm * data \<Rightarrow> actor set"
+  where "readers d \<equiv> snd (fst d)"
+
+text \<open>The predicate @{text \<open>has_access\<close>} is true for owners or readers.\<close> 
+definition has_access :: "[igraph, location, actor, dlm * data] \<Rightarrow> bool"    
+where "has_access G l a d \<equiv> owns G l a d \<or> a \<in> readers d"
+
+text \<open>We define a type of functions that preserves the security labeling and a 
+   corresponding function application  operator.\<close>  
+typedef label_fun = "{f :: dlm * data \<Rightarrow> dlm * data. 
+                        \<forall> x:: dlm * data. fst x = fst (f x)}"  
+  by (fastforce)
+
+definition secure_process :: "label_fun \<Rightarrow> dlm * data \<Rightarrow> dlm * data" (infixr "\<Updown>" 50)
+  where "f  \<Updown> d \<equiv> (Rep_label_fun f) d" 
+
+text \<open>The predicate atI -- mixfix syntax @{text \<open>@\<^bsub>G\<^esub>\<close>} -- expresses that an actor (identity) 
+      is at a certain location in an igraph.\<close>
+definition atI :: "[identity, igraph, location] \<Rightarrow> bool" ("_ @\<^bsub>(_)\<^esub> _" 50)
+where "a @\<^bsub>G\<^esub> l \<equiv> a \<in> (agra G l)"
+
+text \<open>Policies specify the expected behaviour of actors of an infrastructure. 
+They are defined by the @{text \<open>enables\<close>} predicate:
+an actor @{text \<open>h\<close>} is enabled to perform an action @{text \<open>a\<close>} 
+in infrastructure @{text \<open>I\<close>}, at location @{text \<open>l\<close>}
+if there exists a pair @{text \<open>(p,e)\<close>} in the local policy of @{text \<open>l\<close>}
+(@{text \<open>delta I l\<close>} projects to the local policy) such that the action 
+@{text \<open>a\<close>} is a member of the action set @{text \<open>e\<close>} and the policy 
+predicate @{text \<open>p\<close>} holds for actor @{text \<open>h\<close>}.\<close>
+definition enables :: "[infrastructure, location, actor, action] \<Rightarrow> bool"
+where
+"enables I l a a' \<equiv>  (\<exists> (p,e) \<in> delta I (graphI I) l. a' \<in> e \<and> p a)"
+
+text \<open>The behaviour is the good behaviour, i.e. everything allowed by the policy of infrastructure I.\<close>
+definition behaviour :: "infrastructure \<Rightarrow> (location * actor * action)set"
+where "behaviour I \<equiv> {(t,a,a'). enables I t a a'}"
+
+text \<open>The misbehaviour is the complement of the behaviour of an infrastructure I.\<close>
+definition misbehaviour :: "infrastructure \<Rightarrow> (location * actor * action)set"
+where "misbehaviour I \<equiv> -(behaviour I)"
+
+subsection "State transition on infrastructures"
+text \<open>The state transition defines how actors may act on infrastructures through actions
+    within the boundaries of the policy. It is given as an inductive definition over the 
+    states which are infrastructures.  This state transition relation is dependent on actions but also on
+    enabledness and the current state of the infrastructure.\<close>
+
+text \<open>The @{text \<open>move_graph_a\<close>} function encapsulates the infrastructure state change for a 
+      move action used in the subsequent rule move. It relocates the actor from a location l
+      to a new location l' if the actor is actually at l and is not at l'. Additionally, 
+      here for the CreditScoring application, the new location l' needs to be updated in the 
+      actors data by adapting the dgra component of the infrastructure state graph.\<close>
+definition move_graph_a :: "[identity, location, location, igraph] \<Rightarrow> igraph"
+where "move_graph_a n l l' G \<equiv> Lgraph (gra G) 
+                                 (if n \<in> ((agra G) l) &  n \<notin> ((agra G) l') then 
+                                      ((agra G)(l := (agra G l) - {n}))(l' := (insert n (agra G l')))
+                                      else (agra G))
+                               ((dgra G)(n := (fst (dgra G n),(l',snd(snd(dgra G n)))))) 
+                    (bb G)(attendance G)"
+
+
+text \<open>The state transition relation defines the semantics for the actions. We concentrate
+     only on two: move and get. Move models the moving of actors from one locations to another
+     automatically posting the ephemeral ids at the new location (and stop posting them at the 
+     old location, i.e. deleting them there) -- this is implemented in @{text \<open>move_graph_a\<close>}
+     above.
+     For get, an actor a at a location can use get, if he's entitled to do that by the policy, 
+     to extend hos knowledge set. He adds all combinations of the actors a sees at the location 
+     with all ephemeral ids she measures, i.e. which are in the set @{text \<open>egra G l\<close>}. If a
+     already has a nonempty knowledge set @{text \<open>kgra G (Actor a)\<close>} she can already improve
+     her knowledge by building an intersection with the previous knowledge set.\<close>
+inductive state_transition_in :: "[infrastructure, infrastructure] \<Rightarrow> bool" ("(_ \<rightarrow>\<^sub>n _)" 50)
+  where
+move: "\<lbrakk> G = graphI I; a @\<^bsub>G\<^esub> l; l \<in> nodes G; l' \<in> nodes G;
+          a \<in> actors_graph(graphI I); enables I l' (Actor a) move;
+         I' = Infrastructure (move_graph_a a l l' G)(delta I) \<rbrakk> \<Longrightarrow> I \<rightarrow>\<^sub>n I'" 
+
+text \<open>Note that the type infrastructure can now be instantiated to the axiomatic type class 
+      @{text\<open>state\<close>} which enables the use of the underlying Kripke structures and CTL.\<close>
+instantiation "infrastructure" :: state
+begin
+definition 
+   state_transition_infra_def: "(i \<rightarrow>\<^sub>i i') =  (i \<rightarrow>\<^sub>n (i' :: infrastructure))"
+
+instance
+  by (rule MC.class.MC.state.of_class.intro)
+
+definition state_transition_in_refl ("(_ \<rightarrow>\<^sub>n* _)" 50)
+where "s \<rightarrow>\<^sub>n* s' \<equiv> ((s,s') \<in> {(x,y). state_transition_in x y}\<^sup>*)"
+
+end
+
+text \<open>PCR algorithm\<close>
+text \<open>The definition of closest gives a unique predecessor s wrt @{text \<open>\<rightarrow>\<^sub>n*\<close>} for two points s' s''.\<close>
+definition \<open>closest s s' s'' \<equiv> ((s \<rightarrow>\<^sub>n*  s') \<and> (s \<rightarrow>\<^sub>n* s'') \<and>
+               (\<forall> s0. s0 \<rightarrow>\<^sub>n* s' \<and> s0 \<rightarrow>\<^sub>n* s'' \<longrightarrow> s0 \<rightarrow>\<^sub>n* s))\<close>
+
+text \<open>Using the definition of closest we can define counterfactuals for a state s wrt a desirable property
+      P as states s'' with common predecessor s' if these exist. \<close>
+definition \<open>counterfactuals s P \<equiv> {s''. P s'' \<and> (\<exists> s'. (s' \<rightarrow>\<^sub>n* s'') \<and> closest s' s s'')}\<close>
+
+(* standard invariants *)
+lemma delta_invariant: "\<forall> z z'. (z \<rightarrow>\<^sub>n z') \<longrightarrow>  delta(z) = delta(z')"    
+  by (clarify, erule state_transition_in.cases, simp+)
+
+lemma init_state_policy0: 
+  assumes "\<forall> z z'. (z \<rightarrow>\<^sub>n z') \<longrightarrow>  delta(z) = delta(z')"
+      and "(x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>*"
+    shows "delta(x) = delta(y)"
+  sorry
 
 end
