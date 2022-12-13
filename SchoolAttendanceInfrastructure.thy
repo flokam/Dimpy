@@ -4,7 +4,7 @@ subsection \<open>Actors, actions, and data labels\<close>
 theory SchoolAttendanceInfrastructure
   imports Refinement
 begin
-datatype action = get | move | eval | put
+datatype action = delete | move | eval | put
 
 typedecl actor 
 type_synonym identity = string
@@ -37,7 +37,8 @@ datatype ethnicity = black |  white | asian
 datatype disadvantaged = sen | fsm | ehc | csc 
 datatype year = nursery | reception | year1 | year2 | year3 | year4
   | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
-type_synonym data = \<open>location \<times> gender \<times> year \<times> ethnicity \<times> disadvantaged set\<close>
+datatype season = winter | spring | summer | autumn
+type_synonym data = \<open>location \<times> disadvantaged set \<times> gender \<times> year \<times> season\<close>
 type_synonym dlm = \<open>actor \<times> actor set\<close>
 type_synonym absence = nat
 
@@ -46,7 +47,7 @@ datatype igraph = Lgraph
                     (agra: \<open>location \<Rightarrow> identity set\<close>)
                     (dgra: \<open> identity \<Rightarrow> dlm \<times> data\<close>)
                     (bb: \<open> data \<Rightarrow> bool\<close>)
-                    (attendance: \<open>(identity \<times> absence set)set\<close>)
+                    (attendance: \<open>identity \<Rightarrow> bool\<close>)
 
 datatype infrastructure = 
          Infrastructure (graphI: \<open>igraph\<close>)
@@ -132,6 +133,24 @@ where "move_graph_a n l l' G \<equiv> Lgraph (gra G)
                                ((dgra G)(n := (fst (dgra G n),(l',snd(snd(dgra G n)))))) 
                     (bb G)(attendance G)"
 
+definition put_graph_a 
+  where "put_graph_a a d G \<equiv> (Lgraph (gra G)(agra G)
+                ((dgra G)(a := (fst(dgra G a), 
+                          (fst (snd (dgra G a)), 
+                             insert d (fst(snd(snd(dgra G a)))), snd(snd(snd (dgra G a)))))))
+                                      (bb G)(attendance G))"
+
+definition delete_graph_a 
+  where "delete_graph_a a d G \<equiv> (Lgraph (gra G)(agra G)
+                ((dgra G)(a := (fst(dgra G a), 
+                          (fst (snd (dgra G a)), 
+                             (fst(snd(snd(dgra G a)))) - {d}, snd(snd(snd (dgra G a)))))))
+                                      (bb G)(attendance G))"
+
+definition eval_graph_a
+  where "eval_graph_a a G \<equiv> (Lgraph (gra G)(agra G)(dgra G)(bb G)
+                          ((attendance G)(a := (bb G (snd (dgra G a))))))"
+
 
 text \<open>The state transition relation defines the semantics for the actions. We concentrate
      only on two: move and get. Move models the moving of actors from one locations to another
@@ -148,6 +167,27 @@ inductive state_transition_in :: "[infrastructure, infrastructure] \<Rightarrow>
 move: "\<lbrakk> G = graphI I; a @\<^bsub>G\<^esub> l; l \<in> nodes G; l' \<in> nodes G;
           a \<in> actors_graph(graphI I); enables I l' (Actor a) move;
          I' = Infrastructure (move_graph_a a l l' G)(delta I) \<rbrakk> \<Longrightarrow> I \<rightarrow>\<^sub>n I'" 
+| put : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow> 
+          enables I l (Actor a) put \<Longrightarrow>
+          I' = Infrastructure 
+                  (put_graph_a a d G)
+                  (delta I) \<Longrightarrow>
+          I \<rightarrow>\<^sub>n I'" 
+| delete : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow> 
+          d \<in> (fst(snd(snd(dgra G a)))) \<Longrightarrow>
+          enables I l (Actor a) delete \<Longrightarrow>
+          I' = Infrastructure 
+                  (delete_graph_a a d G)
+                  (delta I) \<Longrightarrow>
+          I \<rightarrow>\<^sub>n I'" 
+|   eval : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow>
+           c \<in> actors_graph G \<Longrightarrow> 
+           Actor c \<in> readers (dgra G a) \<or> Actor c = owner (dgra G a) \<Longrightarrow> 
+           enables I l (Actor c) eval \<Longrightarrow>
+          I' = Infrastructure 
+                  (eval_graph_a a G)
+                  (delta I) \<Longrightarrow>
+          I \<rightarrow>\<^sub>n I'"
 
 text \<open>Note that the type infrastructure can now be instantiated to the axiomatic type class 
       @{text\<open>state\<close>} which enables the use of the underlying Kripke structures and CTL.\<close>
@@ -182,5 +222,12 @@ lemma init_state_policy0:
       and "(x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>*"
     shows "delta(x) = delta(y)"
   sorry
+
+lemma init_state_policy: "\<lbrakk> (x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<rbrakk> \<Longrightarrow> 
+                          delta(x) = delta(y)"  
+  by (rule init_state_policy0, rule delta_invariant)
+
+lemma same_nodes0[rule_format]: "\<forall> z z'. z \<rightarrow>\<^sub>n z' \<longrightarrow> nodes(graphI z) = nodes(graphI z')"   
+  oops
 
 end
