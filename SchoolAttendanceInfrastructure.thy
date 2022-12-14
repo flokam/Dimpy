@@ -32,7 +32,7 @@ account.\<close>
 type_synonym dob = nat
 datatype gender = male | female 
 datatype ethnicity = black |  white | asian
-(* special educational needs, free school meal, education health and care,
+(* special educational needs, free school meal, education and  health care and child in social care,
    ... *)
 datatype disadvantaged = sen | fsm | ehc | csc 
 datatype year = nursery | reception | year1 | year2 | year3 | year4
