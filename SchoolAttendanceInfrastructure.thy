@@ -38,7 +38,8 @@ datatype disadvantaged = sen | fsm | ehc | csc
 datatype year = nursery | reception | year1 | year2 | year3 | year4
   | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
 datatype season = winter | spring | summer | autumn
-type_synonym data = \<open>location \<times> disadvantaged set \<times> gender \<times> year \<times> season\<close>
+datatype transport = good | bad
+type_synonym data = \<open>location \<times> disadvantaged set \<times> gender \<times> year \<times> season \<times> transport \<times> ethnicity \<close>
 type_synonym dlm = \<open>actor \<times> actor set\<close>
 type_synonym absence = nat
 
