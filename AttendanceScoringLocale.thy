@@ -14,7 +14,7 @@ defines Coastal_def: "Coastal  \<equiv> Location 0"
 fixes NonCoastal :: "location"
 defines NonCoastal_def: "NonCoastal \<equiv> Location 1"
 fixes London :: "location"
-defines London: "London \<equiv> Location 2"
+defines London_def: "London \<equiv> Location 2"
 
 
 fixes ex_loc_ass :: "location \<Rightarrow> identity set"
@@ -27,44 +27,55 @@ fixes ex_loc_ass' :: "location \<Rightarrow> identity set"
 defines ex_loc_ass'_def: "ex_loc_ass' \<equiv>
           (\<lambda> x. if x = Coastal then {''Bob'', ''Alice''}  
                  else (if x = NonCoastal then {} 
-                       else (if x = London then {''ED''}
+                       else (if x = London then {''ED'', ''Charlie''}
                         else {})))"
 (* data *)
 fixes ex_data :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data_def: \<open>ex_data \<equiv> (\<lambda> x :: identity. 
-                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, 1, Primary,Bad, white))
+                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, bad, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, 0, Seconday,Good, black))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
+                                      else (if x = ''Charlie'' then
+                                                  ((Actor ''Charlie'',{Actor ''ED''}),(London, {}, null, secondary, winter, bad, asian))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''ED'',{}), (London, 0, Seondary ,Good, white))
+                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good, white))
                                                   else 
-                                                    ((Actor '''',{}),(London,0,0,Good, white))))))\<close>
+                                                    ((Actor '''',{}),(London,{},null,primary, winter, good, white)))))))\<close>
 
 fixes ex_data' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data'_def: \<open>ex_data' \<equiv> (\<lambda> x :: identity. 
-                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, 1, Seconday,Good, white))
+                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, 40000,1982,Good, black))
-                                            else (if x = ''CI'' then 
-                                                 ((Actor ''CI'',{}), (London, 0, Seconday,Good,  white))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
+                                            else (if x = ''ED'' then 
+                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good,  white))
                                                   else 
-                                                    ((Actor '''',{}),(London,0, Secondary,Good,  white))))))\<close>
+                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good,  white))))))\<close>
 fixes ex_data'' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data''_def: \<open>ex_data'' \<equiv> (\<lambda> x :: identity. 
-                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, 0, Seconday,Good, white))
+                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''CI''}),(Coastal, 0, Seconday,Good, black))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''CI'',{}), (London, 0, Secondary, Good, white))
+                                                 ((Actor ''CI'',{}), (London, {}, null, secondary, winter, good, white))
                                                   else 
-                                                    ((Actor '''',{}),(London, 0, Secondary, Good, white))))))\<close>
+                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good, white))))))\<close>
 
 
 fixes black_box::  "(data \<Rightarrow> bool)"
 defines black_box_def: \<open>black_box \<equiv> (\<lambda> (d :: data). 
-                            (if (fst d = Coastal) then (fst(snd d) \<ge> 0)
-                             else (if (fst d = NonCoastal) then (fst(snd d) \<ge> 1) else False)))\<close>
+                            (if (fst d = Coastal) then (card(fst(snd d)) = 0)
+                             else (if (fst d = NonCoastal) then (card(fst(snd d)) \<le> 1) 
+                              else (if (fst d = London) then (card(fst(snd d)) \<le> 2) else False))))\<close>
 
+fixes ex_attendance :: \<open>identity \<Rightarrow> bool\<close>
+defines ex_attendance_def: \<open>ex_attendance \<equiv>(\<lambda> x. False)\<close>
+
+fixes ex_attendance' :: \<open>identity \<Rightarrow> bool\<close>
+defines ex_attendance'_def: \<open>ex_attendance' \<equiv> (\<lambda> x. if x = ''Bob'' then True else False)\<close>
+
+
+(*
 fixes ex_requests:: \<open>(identity \<times> bool option)set\<close>
 defines ex_requests_def: \<open>ex_requests \<equiv> {}\<close>
 
@@ -92,33 +103,37 @@ defines ex_requestsV'_def: \<open>ex_requestsV' \<equiv> {(''Alice'', None), (''
 
 fixes ex_requestsV'':: \<open>(identity \<times> bool option)set\<close>
 defines ex_requestsV''_def: \<open>ex_requestsV'' \<equiv> {(''Alice'', Some(True)), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+*)
+
 
 (* Graphs for the various states: initial*)
 fixes ex_graph :: "igraph"
 defines ex_graph_def: "ex_graph \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data black_box ex_requests"
+                                         ex_loc_ass ex_data black_box ex_attendance"
 
 (* Bob puts Attendance application in *)
 fixes ex_graph' :: "igraph"
 defines ex_graph'_def: "ex_graph' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data black_box ex_requests'"
+                                         ex_loc_ass ex_data black_box ex_attendance'"
+
 
 (* ED evaluates Bob's application negatively *)
 fixes ex_graph'' :: "igraph"
 defines ex_graph''_def: "ex_graph'' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data black_box ex_requests''"
+                                         ex_loc_ass ex_data black_box ex_attendance'"
 
 
 (* Next try: now from previous state Bob actions a get to get a salary increase *)
 fixes ex_graph''' :: "igraph"
 defines ex_graph'''_def: "ex_graph''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_requests''"
+                                         ex_loc_ass ex_data' black_box ex_attendance'"
 
 
+(*
 (* Bob puts in a attendance application *)
 fixes ex_graph'''' :: "igraph"
 defines ex_graph''''_def: "ex_graph'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,NonCoastal),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_requests''a"
+                                         ex_loc_ass ex_data' black_box ex_attendance"
 
 
 (* ED evaluates Bob's application - this time positive *)
@@ -150,13 +165,17 @@ defines ex_graphV''''_def: "ex_graphV'''' \<equiv> Lgraph {(Coastal,NonCoastal),
 fixes ex_graphX :: "igraph"
 defines ex_graphX_def: "ex_graphX \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass' ex_data'' black_box ex_requestsV''"
-
+*)
 
 fixes local_policies :: "[igraph, location] \<Rightarrow> policy set"
 defines local_policies_def: "local_policies G \<equiv> 
-    (\<lambda> x. if x = Coastal then  {(\<lambda> y. True, {get,move,put,eval})}
-          else (if x = NonCoastal then {(\<lambda> y. True, {get,move,put,eval})} 
-                else (if x = London then {(\<lambda> y. True, {get,move,put,eval})} 
+    (\<lambda> x. if x = Coastal then  {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
+                                   (\<lambda> y. True, {move})}
+          else (if x = NonCoastal then {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
+                                   (\<lambda> y. True, {move})} 
+                else (if x = London then 
+                         {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
+                                    (\<lambda> y. True, {move})} 
                       else {})))"
 
 (* scenario states *)
@@ -172,6 +191,7 @@ defines CC_def: \<open>CC \<equiv> Infrastructure ex_graph'' local_policies\<clo
 fixes Ca :: \<open>infrastructure\<close>
 defines Ca_def: \<open>Ca \<equiv> Infrastructure ex_graph''' local_policies\<close>
 
+(*
 fixes CCa :: \<open>infrastructure\<close>
 defines CCa_def: \<open>CCa \<equiv> Infrastructure ex_graph'''' local_policies\<close>
 
@@ -192,6 +212,7 @@ defines CCc_def: \<open>CCc \<equiv> Infrastructure ex_graphV'''' local_policies
 
 fixes CCCc :: \<open>infrastructure\<close>
 defines CCCc_def: \<open>CCCc \<equiv> Infrastructure ex_graphX local_policies\<close>
+*)
 
 (* The Attendance scoring Kripke structure *)
 fixes Credit_states
@@ -203,34 +224,40 @@ defines M_def: \<open>M \<equiv> Credit_Kripke\<close>
 
 (* The desirable outcome DO *)
 fixes DO :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> bool\<close>
-defines DO_def: \<open>DO a s \<equiv> (a, Some True) \<in> requests (graphI s)\<close>
+defines DO_def: \<open>DO a s \<equiv> attendance (graphI s) a\<close>
 
 
 fixes ndobob
 defines ndobob_def: \<open>ndobob \<equiv> {(s :: infrastructure). \<not>(DO ''Bob''  s)}\<close>
 
+fixes disadvantage_set :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> disadvantaged set\<close>
+defines disadvantage_set_def : \<open>(disadvantage_set a s) \<equiv> (fst (snd (snd(dgra (graphI s) a))))\<close>
+(*
 fixes salary :: "identity \<Rightarrow> infrastructure \<Rightarrow> nat"
 defines salary_def: \<open>(salary a s) \<equiv> (fst(snd(snd(dgra (graphI s) a))))\<close>
-
+*)
 fixes pc0 
-defines pc0_def: \<open>pc0 A s \<equiv> (salary A s \<ge> 0)\<close>
+defines pc0_def: \<open>pc0 A s \<equiv> (card(disadvantage_set A s) \<le> 1)\<close>
 
 fixes ndoalice
 defines ndoalice_def: \<open>ndoalice \<equiv> {(s :: infrastructure). (pc0 ''Alice'' s) \<and> \<not>(DO ''Alice''  s)}\<close>
 
 fixes pc1
-defines pc1_def: \<open>pc1 A s \<equiv> (salary A s \<ge> 0 \<and> (A  @\<^bsub>(graphI s)\<^esub> Coastal))\<close>
+defines pc1_def: \<open>pc1 A s \<equiv> ( (card(disadvantage_set A s) \<le> 1) \<and> (A  @\<^bsub>(graphI s)\<^esub> Coastal))\<close>
 
 begin 
 
 (* lemmas for the state transitions: a bit tedious but almost all done by sledgehammer automatically*)
 lemma stepI_C: "Ini  \<rightarrow>\<^sub>n C"
-proof (rule_tac l = Coastal and a = "''Bob''" in put)
+proof (rule_tac l = Coastal and a = "''Bob''" and c = "''ED''" in eval)
   show "graphI Ini = graphI Ini" by (rule refl)
 next show "''Bob'' @\<^bsub>graphI Ini\<^esub> Coastal"
     by (simp add: Ini_def atI_def ex_graph_def ex_loc_ass_def)
 next show "Coastal \<in> nodes (graphI Ini)"
     using Ini_def ex_graph_def nodes_def by auto
+next show \<open>''ED'' \<in> actors_graph (graphI Ini)\<close>
+    by (simp add: Ini_def ex_graph_def actors_graph_def nodes_def ex_loc_ass_def London_def 
+                     NonCoastal_def Coastal_def, blast)
 next show \<open>enables Ini Coastal (Actor ''Bob'') put\<close>
     by (simp add: Ini_def enables_def local_policies_def)
 next show \<open>C = Infrastructure (put_graph_a ''Bob'' Coastal (graphI Ini)) (delta Ini)\<close>
