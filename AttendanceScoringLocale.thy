@@ -4,8 +4,8 @@ theory AttendanceScoringLocale
   imports SchoolAttendanceInfrastructure
 begin
 locale AttendanceScoring = 
-  fixes AttendanceScoring_actors ::\<open>identity set\<close>
-  defines AttendanceScoring_actors_def: \<open>AttendanceScoring_actors \<equiv> {''Alice'',''Bob'',''Charlie'',''ED''}\<close>
+fixes AttendanceScoring_actors ::\<open>identity set\<close>
+defines AttendanceScoring_actors_def: \<open>AttendanceScoring_actors \<equiv> {''Alice'',''Bob'',''Charlie'',''ED''}\<close>
 
 fixes CreditScoring_locations :: "location set"
 defines CreditScoring_locations_def: "CreditScoring_locations \<equiv> {Location 0, Location 1, Location 2}"
@@ -57,7 +57,7 @@ defines ex_data''_def: \<open>ex_data'' \<equiv> (\<lambda> x :: identity.
                                       else (if x = ''Alice'' then 
                                                  ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''CI'',{}), (London, {}, null, secondary, winter, good, white))
+                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good, white))
                                                   else 
                                                     ((Actor '''',{}),(London, {}, null, secondary, winter, good, white))))))\<close>
 
@@ -123,25 +123,23 @@ defines ex_graph''_def: "ex_graph'' \<equiv> Lgraph {(Coastal,NonCoastal),(Coast
                                          ex_loc_ass ex_data black_box ex_attendance'"
 
 
-(* Next try: now from previous state Bob actions a get to get a salary increase *)
+(* Next try: now from previous state Bob actions a get to get a location change *)
 fixes ex_graph''' :: "igraph"
 defines ex_graph'''_def: "ex_graph''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance'"
 
-
-(*
 (* Bob puts in a attendance application *)
 fixes ex_graph'''' :: "igraph"
 defines ex_graph''''_def: "ex_graph'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,NonCoastal),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance"
 
 
-(* ED evaluates Bob's application - this time positive *)
+(*(* ED evaluates Bob's application - this time positive *)
 fixes ex_graphV :: "igraph"
 defines ex_graphV_def: "ex_graphV \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_requests'''"
-
-(* Now, Alice puts in a attendance application *)
+                                         ex_loc_ass ex_data' black_box ex_attendance'''"
+*)
+(*(* Now, Alice puts in a attendance application *)
 fixes ex_graphV' :: "igraph"
 defines ex_graphV'_def: "ex_graphV' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_requests''''"
@@ -214,13 +212,13 @@ fixes CCCc :: \<open>infrastructure\<close>
 defines CCCc_def: \<open>CCCc \<equiv> Infrastructure ex_graphX local_policies\<close>
 *)
 
-(* The Attendance scoring Kripke structure *)
-fixes Credit_states
-defines Credit_states_def: \<open>Credit_states \<equiv> {s. Ini \<rightarrow>\<^sub>i* s }\<close>
-fixes Credit_Kripke
-defines Credit_Kripke_def: \<open>Credit_Kripke \<equiv> Kripke Credit_states {Ini}\<close>
+(* The School Attendance Kripke structure *)
+fixes Attendance_states
+defines Attendance_states_def: \<open>Attendance_states \<equiv> {s. Ini \<rightarrow>\<^sub>i* s }\<close>
+fixes Attendance_Kripke
+defines Attendance_Kripke_def: \<open>Attendance_Kripke \<equiv> Kripke Attendance_states {Ini}\<close>
 fixes M
-defines M_def: \<open>M \<equiv> Credit_Kripke\<close>
+defines M_def: \<open>M \<equiv> Attendance_Kripke\<close>
 
 (* The desirable outcome DO *)
 fixes DO :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> bool\<close>
@@ -271,20 +269,22 @@ next show \<open>''Bob'' @\<^bsub>graphI C\<^esub> Coastal\<close>
     by (simp add: C_def atI_def ex_graph'_def ex_loc_ass_def)
 next show \<open>Coastal \<in> nodes (graphI C)\<close>
     using C_def ex_graph'_def nodes_def by auto
-next show \<open>''CI'' \<in> actors_graph (graphI C)\<close>
+next show \<open>''ED'' \<in> actors_graph (graphI C)\<close>
     apply (simp add: actors_graph_def)
     by (simp add: C_def ex_graph'_def ex_loc_ass_def London_def NonCoastal_def Coastal_def nodes_def, blast)
-next show "(''Bob'', None) \<in> requests (graphI C)"
-    by (simp add: C_def ex_graph'_def ex_requests'_def)
+
+next show "(''Bob'', None) \<in> attendance (graphI C)"
+    by (simp add: C_def ex_graph'_def ex_attendance'_def)
+
 next show \<open> Actor ''ED'' \<in> readers (dgra (graphI C) ''Bob'') \<or> Actor ''ED'' = owner (dgra (graphI C) ''Bob'')\<close>
     by (simp add: readers_def C_def ex_graph'_def ex_data_def)
 next show \<open>enables C Coastal (Actor ''ED'') eval\<close>
     by (simp add: C_def enables_def local_policies_def)
 next show "CC = Infrastructure (eval_graph_a ''Bob'' Coastal (graphI C)) (delta C)"
     by (simp add: eval_graph_a_def C_def CC_def ex_graph'_def ex_graph''_def black_box_def 
-                    ex_requests''_def ex_requests'_def ex_data_def)
+                    ex_attendance''_def ex_attendance'_def ex_data_def)
 qed
-
+ 
 lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
 proof (rule_tac l = Coastal and a = "''Bob''" and m = "0" in get)
   show "graphI CC = graphI CC" by (rule refl)
@@ -299,7 +299,7 @@ next show \<open>Ca = Infrastructure (get_graph_a ''Bob'' Coastal 0 (graphI CC))
     apply (rule ext)
     by force
 qed
-
+(*
 lemma stepCa_CCa: "Ca  \<rightarrow>\<^sub>n CCa"
 proof (rule_tac l = Coastal and a = "''Bob''" in put)
   show "graphI Ca = graphI Ca" by (rule refl)
@@ -426,6 +426,7 @@ next show \<open>CCCc = Infrastructure (eval_graph_a ''Alice'' Coastal (graphI C
     by (simp add: eval_graph_a_def CCCc_def ex_graphX_def CCc_def ex_graphV''''_def ex_requestsV'_def ex_requestsV''_def
                      black_box_def ex_data''_def)
 qed
+*)
 
 (* Application of PCR cycle *)
 

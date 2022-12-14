@@ -30,13 +30,14 @@ This enables the unique security
 labelling of data within the system additionally taking the ownership into 
 account.\<close>
 type_synonym dob = nat
-datatype gender = male | female 
+datatype gender = male | female | null
 datatype ethnicity = black |  white | asian
 (* special educational needs, free school meal, education and  health care and child in social care,
    ... *)
 datatype disadvantaged = sen | fsm | ehc | csc 
-datatype year = nursery | reception | year1 | year2 | year3 | year4
-  | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12
+datatype year = primary | secondary
+(* nursery | reception | year1 | year2 | year3 | year4
+  | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12 *)
 datatype season = winter | spring | summer | autumn
 datatype transport = good | bad
 type_synonym data = \<open>location \<times> disadvantaged set \<times> gender \<times> year \<times> season \<times> transport \<times> ethnicity \<close>
