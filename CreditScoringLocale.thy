@@ -249,6 +249,7 @@ next show \<open>''CI'' \<in> actors_graph (graphI C)\<close>
     by (simp add: C_def ex_graph'_def ex_loc_ass_def E1_def SE1_def N3_def nodes_def, blast)
 next show "(''Bob'', None) \<in> requests (graphI C)"
     by (simp add: C_def ex_graph'_def ex_requests'_def)
+
 next show \<open> Actor ''CI'' \<in> readers (dgra (graphI C) ''Bob'') \<or> Actor ''CI'' = owner (dgra (graphI C) ''Bob'')\<close>
     by (simp add: readers_def C_def ex_graph'_def ex_data_def)
 next show \<open>enables C N3 (Actor ''CI'') eval\<close>
