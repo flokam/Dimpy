@@ -5,7 +5,7 @@ theory AttendanceScoringLocale
 begin
 locale AttendanceScoring = 
 fixes AttendanceScoring_actors ::\<open>identity set\<close>
-defines AttendanceScoring_actors_def: \<open>AttendanceScoring_actors \<equiv> {''Alice'',''Bob'',''Charlie'',''ED''}\<close>
+defines AttendanceScoring_actors_def: \<open>AttendanceScoring_actors \<equiv> {''Alice'',''Bob'',''ED'', ''Charlie''}\<close>
 
 fixes CreditScoring_locations :: "location set"
 defines CreditScoring_locations_def: "CreditScoring_locations \<equiv> {Location 0, Location 1, Location 2}"
@@ -32,13 +32,13 @@ defines ex_loc_ass'_def: "ex_loc_ass' \<equiv>
 (* data *)
 fixes ex_data :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data_def: \<open>ex_data \<equiv> (\<lambda> x :: identity. 
-                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, bad, white))
+                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal,{fsm}, male, primary, winter, bad, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {fsm, sen}, female, secondary, winter, good, black))
                                       else (if x = ''Charlie'' then
-                                                  ((Actor ''Charlie'',{Actor ''ED''}),(London, {}, null, secondary, winter, bad, asian))
+                                                  ((Actor ''Charlie'',{Actor ''ED''}),(London, {fsm, sen, ehc}, null, secondary, winter, bad, asian))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good, white))
+                                                 ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good, white))
                                                   else 
                                                     ((Actor '''',{}),(London,{},null,primary, winter, good, white)))))))\<close>
 
@@ -46,18 +46,18 @@ fixes ex_data' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data'_def: \<open>ex_data' \<equiv> (\<lambda> x :: identity. 
                                      (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {fsm, sen}, female, secondary, winter, good, black))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good,  white))
+                                                 ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good,  white))
                                                   else 
                                                     ((Actor '''',{}),(London, {}, null, secondary, winter, good,  white))))))\<close>
 fixes ex_data'' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data''_def: \<open>ex_data'' \<equiv> (\<lambda> x :: identity. 
                                      (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
-                                                 ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {}, female, secondary, winter, good, black))
+                                                 ((Actor ''Alice'',{Actor ''ED''}),(Coastal, {fsm, sen}, female, secondary, winter, good, black))
                                             else (if x = ''ED'' then 
-                                                 ((Actor ''ED'',{}), (London, {}, null, secondary, winter, good, white))
+                                                 ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good, white))
                                                   else 
                                                     ((Actor '''',{}),(London, {}, null, secondary, winter, good, white))))))\<close>
 
@@ -74,36 +74,28 @@ defines ex_attendance_def: \<open>ex_attendance \<equiv>(\<lambda> x. False)\<cl
 fixes ex_attendance' :: \<open>identity \<Rightarrow> bool\<close>
 defines ex_attendance'_def: \<open>ex_attendance' \<equiv> (\<lambda> x. if x = ''Bob'' then True else False)\<close>
 
+fixes ex_attendance'':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''_def: \<open>ex_attendance'' \<equiv> {(''Bob'', Some (False))}\<close>
 
-(*
-fixes ex_requests:: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests_def: \<open>ex_requests \<equiv> {}\<close>
-
-fixes ex_requests':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests'_def: \<open>ex_requests' \<equiv> {(''Bob'', None)}\<close>
-
-fixes ex_requests'':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests''_def: \<open>ex_requests'' \<equiv> {(''Bob'', Some(False))}\<close>
-
-fixes ex_requests''a:: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests''a_def: \<open>ex_requests''a \<equiv> {(''Bob'', None), (''Bob'', Some(False))}\<close>
+fixes ex_attendance''a:: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''a_def: \<open>ex_attendance''a \<equiv> {(''Bob'', None), (''Bob'', Some(False))}\<close>
 
 
-fixes ex_requests''':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests'''_def: \<open>ex_requests''' \<equiv> {(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+fixes ex_attendance''':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance'''_def: \<open>ex_attendance''' \<equiv> {(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
 
-fixes ex_requests'''':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requests''''_def: \<open>ex_requests'''' \<equiv> {(''Alice'', None),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+fixes ex_attendance'''':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''''_def: \<open>ex_attendance'''' \<equiv> {(''Alice'', None),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
 
-fixes ex_requestsV:: \<open>(identity \<times> bool option)set\<close>
-defines ex_requestsV_def: \<open>ex_requestsV \<equiv> {(''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+fixes ex_attendanceV:: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV_def: \<open>ex_attendanceV \<equiv> {(''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
 
-fixes ex_requestsV':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requestsV'_def: \<open>ex_requestsV' \<equiv> {(''Alice'', None), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+fixes ex_attendanceV':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV'_def: \<open>ex_attendanceV' \<equiv> {(''Alice'', None), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
 
-fixes ex_requestsV'':: \<open>(identity \<times> bool option)set\<close>
-defines ex_requestsV''_def: \<open>ex_requestsV'' \<equiv> {(''Alice'', Some(True)), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
-*)
+fixes ex_attendanceV'':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV''_def: \<open>ex_attendanceV'' \<equiv> {(''Alice'', Some(True)), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+
 
 
 (* Graphs for the various states: initial*)
@@ -123,46 +115,48 @@ defines ex_graph''_def: "ex_graph'' \<equiv> Lgraph {(Coastal,NonCoastal),(Coast
                                          ex_loc_ass ex_data black_box ex_attendance'"
 
 
-(* Next try: now from previous state Bob actions a get to get a location change *)
+(* Next try: now from previous state Bob actions a get to get a disadvantage set change *)
 fixes ex_graph''' :: "igraph"
 defines ex_graph'''_def: "ex_graph''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance'"
 
 (* Bob puts in a attendance application *)
 fixes ex_graph'''' :: "igraph"
-defines ex_graph''''_def: "ex_graph'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,NonCoastal),(NonCoastal,London)} 
+defines ex_graph''''_def: "ex_graph'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal, London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance"
 
-
-(*(* ED evaluates Bob's application - this time positive *)
+(*
+(* ED evaluates Bob's application - this time positive *)
 fixes ex_graphV :: "igraph"
 defines ex_graphV_def: "ex_graphV \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance'''"
 *)
-(*(* Now, Alice puts in a attendance application *)
+
+(*
+(* Now, Alice puts in a attendance application *)
 fixes ex_graphV' :: "igraph"
 defines ex_graphV'_def: "ex_graphV' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_requests''''"
+                                         ex_loc_ass ex_data' black_box ex_attendance''''"
 
 (* Alice's application is evaluated by ED to negative *)
 fixes ex_graphV'' :: "igraph"
 defines ex_graphV''_def: "ex_graphV'' \<equiv> Lgraph {(Coastal,NonCoastal),(NonCoastal,London),(Noncoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_requestsV"
+                                         ex_loc_ass ex_data' black_box ex_attendanceV"
 
 (* Alice now moves to Coastal *)
 fixes ex_graphV''' :: "igraph"
 defines ex_graphV'''_def: "ex_graphV''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass' ex_data'' black_box ex_requestsV"
+                                         ex_loc_ass' ex_data'' black_box ex_attendanceV"
 
 (* Alice now puts in an application from Coastal *)
 fixes ex_graphV'''' :: "igraph"
 defines ex_graphV''''_def: "ex_graphV'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal ,London)} 
-                                         ex_loc_ass' ex_data'' black_box ex_requestsV'"
+                                         ex_loc_ass' ex_data'' black_box ex_attendanceV'"
 
 (* This time, ED evaluates to positive *)
 fixes ex_graphX :: "igraph"
 defines ex_graphX_def: "ex_graphX \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass' ex_data'' black_box ex_requestsV''"
+                                         ex_loc_ass' ex_data'' black_box ex_attendanceV''"
 *)
 
 fixes local_policies :: "[igraph, location] \<Rightarrow> policy set"
@@ -189,9 +183,11 @@ defines CC_def: \<open>CC \<equiv> Infrastructure ex_graph'' local_policies\<clo
 fixes Ca :: \<open>infrastructure\<close>
 defines Ca_def: \<open>Ca \<equiv> Infrastructure ex_graph''' local_policies\<close>
 
-(*
+
 fixes CCa :: \<open>infrastructure\<close>
 defines CCa_def: \<open>CCa \<equiv> Infrastructure ex_graph'''' local_policies\<close>
+
+(*
 
 fixes CCCa :: \<open>infrastructure\<close>
 defines CCCa_def: \<open>CCCa \<equiv> Infrastructure ex_graphV local_policies\<close>
@@ -210,8 +206,8 @@ defines CCc_def: \<open>CCc \<equiv> Infrastructure ex_graphV'''' local_policies
 
 fixes CCCc :: \<open>infrastructure\<close>
 defines CCCc_def: \<open>CCCc \<equiv> Infrastructure ex_graphX local_policies\<close>
-*)
 
+*)
 (* The School Attendance Kripke structure *)
 fixes Attendance_states
 defines Attendance_states_def: \<open>Attendance_states \<equiv> {s. Ini \<rightarrow>\<^sub>i* s }\<close>
@@ -230,10 +226,7 @@ defines ndobob_def: \<open>ndobob \<equiv> {(s :: infrastructure). \<not>(DO ''B
 
 fixes disadvantage_set :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> disadvantaged set\<close>
 defines disadvantage_set_def : \<open>(disadvantage_set a s) \<equiv> (fst (snd (snd(dgra (graphI s) a))))\<close>
-(*
-fixes salary :: "identity \<Rightarrow> infrastructure \<Rightarrow> nat"
-defines salary_def: \<open>(salary a s) \<equiv> (fst(snd(snd(dgra (graphI s) a))))\<close>
-*)
+
 fixes pc0 
 defines pc0_def: \<open>pc0 A s \<equiv> (card(disadvantage_set A s) \<le> 1)\<close>
 
@@ -254,12 +247,12 @@ next show "''Bob'' @\<^bsub>graphI Ini\<^esub> Coastal"
 next show "Coastal \<in> nodes (graphI Ini)"
     using Ini_def ex_graph_def nodes_def by auto
 next show \<open>''ED'' \<in> actors_graph (graphI Ini)\<close>
-    by (simp add: Ini_def ex_graph_def actors_graph_def nodes_def ex_loc_ass_def London_def 
+    by (simp add: Ini_def atI_def ex_graph_def actors_graph_def nodes_def ex_loc_ass_def London_def 
                      NonCoastal_def Coastal_def, blast)
 next show \<open>enables Ini Coastal (Actor ''Bob'') put\<close>
-    by (simp add: Ini_def enables_def local_policies_def)
+    by (simp add: Ini_def  enables_def local_policies_def)
 next show \<open>C = Infrastructure (put_graph_a ''Bob'' Coastal (graphI Ini)) (delta Ini)\<close>
-    by (simp add: C_def Ini_def ex_graph'_def ex_graph_def ex_requests'_def ex_requests_def put_graph_a_def)
+    by (simp add: C_def Ini_def ex_graph'_def ex_graph_def ex_attendance'_def ex_attendance_def put_graph_a_def)
 qed
 
 lemma stepC_CC: "C  \<rightarrow>\<^sub>n CC"
@@ -272,7 +265,6 @@ next show \<open>Coastal \<in> nodes (graphI C)\<close>
 next show \<open>''ED'' \<in> actors_graph (graphI C)\<close>
     apply (simp add: actors_graph_def)
     by (simp add: C_def ex_graph'_def ex_loc_ass_def London_def NonCoastal_def Coastal_def nodes_def, blast)
-
 next show "(''Bob'', None) \<in> attendance (graphI C)"
     by (simp add: C_def ex_graph'_def ex_attendance'_def)
 
@@ -285,7 +277,7 @@ next show "CC = Infrastructure (eval_graph_a ''Bob'' Coastal (graphI C)) (delta 
                     ex_attendance''_def ex_attendance'_def ex_data_def)
 qed
  
-lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
+(*lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
 proof (rule_tac l = Coastal and a = "''Bob''" and m = "0" in get)
   show "graphI CC = graphI CC" by (rule refl)
 next show "''Bob'' @\<^bsub>graphI CC\<^esub> Coastal"
@@ -299,6 +291,7 @@ next show \<open>Ca = Infrastructure (get_graph_a ''Bob'' Coastal 0 (graphI CC))
     apply (rule ext)
     by force
 qed
+*)
 (*
 lemma stepCa_CCa: "Ca  \<rightarrow>\<^sub>n CCa"
 proof (rule_tac l = Coastal and a = "''Bob''" in put)
@@ -443,24 +436,25 @@ next show \<open>\<turnstile>[\<N>\<^bsub>({C}, ndobob)\<^esub>] \<oplus>\<^sub>
     apply (rule conjI)
     prefer 2
     using stepC_CC apply blast
-    by (simp add: DO_def CC_def ex_graph''_def ex_requests''_def)
+    by (simp add: DO_def CC_def ex_graph''_def ex_attendance''_def)
 qed
 
 (* The attack gives us the CTL formula by Correctness of AT *)
-lemma Credit_att: "M \<turnstile> EF ndobob"
+lemma Attendance_att: "M \<turnstile> EF ndobob"
 proof -
   have a: \<open>\<turnstile>([\<N>\<^bsub>({Ini},{C})\<^esub>, \<N>\<^bsub>({C},ndobob)\<^esub>] \<oplus>\<^sub>\<and>\<^bsup>({Ini},ndobob)\<^esup>)\<close> by (rule att_ndobob_Kripke)
   hence "({Ini}, ndobob) = attack (([\<N>\<^bsub>({Ini},{C})\<^esub>, \<N>\<^bsub>({C},ndobob)\<^esub>] \<oplus>\<^sub>\<and>\<^bsup>({Ini},ndobob)\<^esup>))" by simp
   hence \<open>Kripke {s::infrastructure. \<exists>i::infrastructure\<in> {Ini}. i \<rightarrow>\<^sub>i* s} {Ini} \<turnstile> EF ndobob\<close>
     using AT_EF att_ndobob_Kripke by fastforce
   thus \<open>M \<turnstile> EF ndobob\<close>
-    by (simp add: Credit_Kripke_def Credit_states_def M_def)
+    by (simp add: Attendance_Kripke_def Attendance_states_def M_def)
 qed
 
 (* Step 2: Now, apply counterfactuals to find a close state with DO and first precondition:
   Find an initial precondition that yields the desirable outcome DO 
   in a closest state using counterfactuals. *) 
 
+(*
 (* Application of counterfactuals to find that closest state with DO is CCCa *)
 lemma counterfactual_CCCa: \<open>CCCa \<in> (counterfactuals CC (\<lambda> s. DO ''Bob'' s))\<close>
   apply (simp add: counterfactuals_def)
@@ -488,14 +482,15 @@ lemma counterfactual_CCCa: \<open>CCCa \<in> (counterfactuals CC (\<lambda> s. D
   apply (simp add: r_into_rtrancl state_transition_in_refl_def stepCa_CCa)
 by (simp add: r_into_rtrancl state_transition_in_refl_def stepCC_Ca)
 
-(* As a result the new (first) precondition is pc0 \<equiv> salary A \<ge> 0 *)
+*)
 
-(* Step 3: Generalisation *)
+(* As a result the new (first) precondition is pc0 \<equiv> card(disadvantage_set A s) \<le> 1 *)
+(*Step 3: Generalisation *)
 (* Try to generalize over all actors, that is, try to show for all actors A
     AG {w. pc0 \<longrightarrow> DO A s }*)
 (* Attack tree analysis shows that this fails because for Alice there is a path to
    a failure state where pc0 holds but not DO. *)
-
+(*
 lemma att_nodoalice_Kripke: \<open>\<turnstile>([\<N>\<^bsub>({Ini},{C})\<^esub>, \<N>\<^bsub>({C},{CC})\<^esub>,\<N>\<^bsub>({CC},{Ca})\<^esub>,\<N>\<^bsub>({Ca},{CCa})\<^esub>, 
                         \<N>\<^bsub>({CCa},{CCCa})\<^esub>, \<N>\<^bsub>({CCCa},{Cb})\<^esub>,\<N>\<^bsub>({Cb},ndoalice)\<^esub>] \<oplus>\<^sub>\<and>\<^bsup>({Ini},ndoalice)\<^esup>)\<close>
 proof (subst att_and, simp, rule conjI)
@@ -522,16 +517,16 @@ next show \<open> \<turnstile>[\<N>\<^bsub>({C}, {CC})\<^esub>, \<N>\<^bsub>({CC
     apply (simp add: att_base)
     apply (rule_tac x = CCb in exI)
     apply (rule conjI)
-     apply (simp add: CCb_def ex_graphV''_def pc0_def salary_def ex_data'_def)
+     apply (simp add: CCb_def ex_graphV''_def pc0_def disadvantage_set_def ex_data'_def)
     apply (rule conjI)
-     apply (simp add: DO_def CCb_def ex_graphV''_def ex_requestsV_def)
+     apply (simp add: DO_def CCb_def ex_graphV''_def ex_attendanceV_def)
     by (simp add: state_transition_infra_def stepCb_CCb)
 qed
-
+*)
 (* Application of counterfactuals to find that the closest state to  CCb where DO holds is CCc.
    This isnpires the next precondition pc1 as in CCCc we have 
    salary A s \<ge> 0 \<and> A  @\<^bsub>(graphI s)\<^esub> Coastal) *)
-lemma counterfactual_CCCc: \<open>CCCc \<in> (counterfactuals CCb (\<lambda> s. DO ''Alice'' s))\<close>
+(*lemma counterfactual_CCCc: \<open>CCCc \<in> (counterfactuals CCb (\<lambda> s. DO ''Alice'' s))\<close>
   apply (simp add: counterfactuals_def)
   apply (rule conjI)
   apply (simp add: CCCc_def DO_def ex_graphX_def ex_requestsV''_def)
@@ -554,9 +549,9 @@ lemma counterfactual_CCCc: \<open>CCCc \<in> (counterfactuals CCb (\<lambda> s. 
      apply (simp add: r_into_rtrancl state_transition_in_refl_def stepCCc_CCCc)
   apply (simp add: r_into_rtrancl state_transition_in_refl_def stepCc_CCc)
   by (simp add: r_into_rtrancl state_transition_in_refl_def stepCCb_Cc)
-
+*)
 (* The attack gives us the CTL formula of reachability of the failure state by Correctness of AT *)
-lemma Credit_att': "M \<turnstile> EF ndoalice"
+lemma Attendance_att': "M \<turnstile> EF ndoalice"
 proof -
   have a: \<open>\<turnstile>([\<N>\<^bsub>({Ini},{C})\<^esub>, \<N>\<^bsub>({C},{CC})\<^esub>,\<N>\<^bsub>({CC},{Ca})\<^esub>,\<N>\<^bsub>({Ca},{CCa})\<^esub>, 
                         \<N>\<^bsub>({CCa},{CCCa})\<^esub>, \<N>\<^bsub>({CCCa},{Cb})\<^esub>,\<N>\<^bsub>({Cb},ndoalice)\<^esub>] \<oplus>\<^sub>\<and>\<^bsup>({Ini},ndoalice)\<^esup>)\<close> 
@@ -566,17 +561,17 @@ proof -
   hence \<open>Kripke {s::infrastructure. \<exists>i::infrastructure\<in> {Ini}. i \<rightarrow>\<^sub>i* s} {Ini} \<turnstile> EF ndoalice\<close>
     using AT_EF att_nodoalice_Kripke by fastforce
   thus \<open>M \<turnstile> EF ndoalice\<close>
-    by (simp add: Credit_Kripke_def Credit_states_def M_def)
+    by (simp add: Attendance_Kripke_def Attendance_states_def M_def)
 qed
 
 (* Next iteration: go back to 2 with the new precondition 
-   pc1 A s  \<equiv>  (salary A s \<ge> 0 \<and> (A  @\<^bsub>(graphI s)\<^esub> Coastal)).
-   Now thgeneralisation step succeeds. *)
-lemma Alice_Bob_in_Credit_Kripke: "s \<in> states(Credit_Kripke)  \<Longrightarrow> 
+   pc1 A s  \<equiv>  ((card(disadvantage_set A s) \<le> 1) \<and> (A  @\<^bsub>(graphI s)\<^esub> Coastal)).
+   Now the generalisation step succeeds. *)
+lemma Alice_Bob_in_Attendance_Kripke: "s \<in> states(Attendance_Kripke)  \<Longrightarrow> 
       actors_graph (graphI s) = {''Alice'',''Bob'',''ED''}"
   apply (subgoal_tac \<open>(Ini, s) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<close>)
   prefer 2
-   apply (smt (verit, del_insts) CollectD Collect_cong Credit_Kripke_def Credit_states_def split_cong state_transition_infra_def state_transition_refl_def states.simps)
+   apply (smt (verit, del_insts) CollectD Collect_cong Attendance_Kripke_def Attendance_states_def split_cong state_transition_infra_def state_transition_refl_def states.simps)
   apply (subgoal_tac \<open>actors_graph (graphI Ini) =  {''Alice'',''Bob'',''ED''}\<close>)
    apply (erule subst)
    apply (rule sym)
@@ -617,7 +612,7 @@ proof -
   fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: location and ya :: location and G :: igraph and I :: infrastructure and aa :: "char list" and la :: location and l' :: location and I' :: infrastructure and x :: "(actor \<Rightarrow> bool) \<times> action set"
   assume a1: "case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor aa)"
 assume a2: "x \<in> delta I (graphI I) l'"
-  assume a3: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_requests) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
+  assume a3: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
   then have "local_policies (graphI I) l' = {(\<lambda>a. True, {get, move, put, eval})}"
     using a2 by (metis (no_types) delta_simps empty_iff init_state_policy local_policies_def)
     then show "case x of (p, A) \<Rightarrow> move \<in> A \<and> p (Actor a)"
@@ -625,7 +620,7 @@ using a3 a2 a1 init_state_policy by fastforce
 next show \<open>\<And>y z a l ya G I aa la l' I' x.
        (Infrastructure
          (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_requests)
+           ex_data black_box ex_attendance)
          local_policies,
         I)
        \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
@@ -649,7 +644,7 @@ next show \<open>\<And>y z a l ya G I aa la l' I' x.
 next show \<open>\<And>y z a l ya G I aa la I' m.
        (Infrastructure
          (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_requests)
+           ex_data black_box ex_attendance)
          local_policies,
         y)
        \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
@@ -673,7 +668,7 @@ proof -
 fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: location and ya :: location and G :: igraph and I :: infrastructure and aa :: "char list" and la :: location and I' :: infrastructure and m :: nat and x :: "(actor \<Rightarrow> bool) \<times> action set"
   assume "G = graphI I"
   assume a1: "x \<in> delta I (graphI I) la"
-assume "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_requests) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
+assume "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
   then have f2: "delta I = local_policies"
     by (smt (z3) delta_simps init_state_policy)
   have "\<forall>p pa. \<exists>paa A. ((case p of (x::actor \<Rightarrow> bool, xa::action set) \<Rightarrow> pa x xa) \<or> (paa, A) = p) \<and> (\<not> pa paa A \<or> (case p of (x, xa) \<Rightarrow> pa x xa))"
@@ -683,7 +678,7 @@ then show "case x of (p, A) \<Rightarrow> move \<in> A \<and> p (Actor a)"
 next show \<open>\<And>y z a l ya G I aa la I' m x.
        (Infrastructure
          (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_requests)
+           ex_data black_box ex_attendance)
          local_policies,
         I)
        \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
@@ -720,10 +715,10 @@ next show \<open>\<And>y z. (Ini, y) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<
            \<forall>a\<in>actors_graph (graphI y). \<forall>l\<in>nodes (graphI y). enables y l (Actor a) get \<Longrightarrow>
            \<forall>a\<in>actors_graph (graphI z). \<forall>l\<in>nodes (graphI z). enables z l (Actor a) get \<close>
     apply (clarify, simp add: Ini_def ex_graph_def local_policies_def  nodes_def enables_def
-         E1_def N3_def SE1_def, erule exE)
+         London_def Coastal_def NonCoastal_def, erule exE)
     apply (erule state_transition_in.cases)
-    apply (smt (z3) N3_def delta_simps igraph.sel(1) graphI_simps init_state_policy local_policies_def put put_graph_a_def same_actors0)
-    apply (smt (z3) E1_def N3_def One_nat_def SE1_def delta_simps empty_iff eval eval_graph_a_def ex_graph_def igraph.sel(1) graphI_simps init_state_policy local_policies_def same_actors0)
+    apply (smt (z3) Coastal_def delta_simps igraph.sel(1) graphI_simps init_state_policy local_policies_def put put_graph_a_def same_actors0)
+    apply (smt (z3) London_def Coastal_def One_nat_def NonCoastal_def delta_simps empty_iff eval eval_graph_a_def ex_graph_def igraph.sel(1) graphI_simps init_state_policy local_policies_def same_actors0)
      apply (simp add: enables_def)
     apply (erule bexE)
      apply (rule_tac x = x in bexI)
@@ -741,9 +736,9 @@ fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: l
   assume a2: "x \<in> delta I (graphI I) la"
   assume a3: "(l, ya) \<in> gra (graphI I) \<or> (ya, l) \<in> gra (graphI I)"
   assume a4: "\<forall>a\<in>actors_graph (graphI I). \<forall>l. (\<exists>y. (l, y) \<in> gra (graphI I) \<or> (y, l) \<in> gra (graphI I)) \<longrightarrow> (\<exists>x\<in>delta I (graphI I) l. case x of (p, e) \<Rightarrow> get \<in> e \<and> p (Actor a))"
-  assume a5: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_requests) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
-  assume a6: "a \<in> actors_graph (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (requests (graphI I)))"
-  assume "I' = Infrastructure (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (requests (graphI I))) (delta I)"
+  assume a5: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
+  assume a6: "a \<in> actors_graph (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendancce (graphI I)))"
+  assume "I' = Infrastructure (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendance (graphI I))) (delta I)"
   have f7: "a \<in> {cs. \<exists>l. l \<in> {l. \<exists>la. (l, la) \<in> gra G \<or> (la, l) \<in> gra G} \<and> cs \<in> agra G l}"
     using a6 a1 by (simp add: actors_graph_def nodes_def)
   have "\<forall>l cs. \<exists>p. \<forall>la lb. ((l, la) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> p \<in> delta I (graphI I) l) \<and> ((lb, l) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> p \<in> delta I (graphI I) l)"
@@ -755,7 +750,7 @@ fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: l
     using f7 a1 actors_graph_def nodes_def by blast
   have "\<And>l la. (l, la) \<notin> gra G \<or> pp l a \<in> delta I G l"
     using f8 f7 a1 actors_graph_def nodes_def by blast
-  then show "x \<in> delta I (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (requests (graphI I))) l"
+  then show "x \<in> delta I (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendance (graphI I))) l"
     using f9 a5 a3 a2 a1 by (smt (z3) delta_simps empty_iff init_state_policy local_policies_def)
 qed
 qed
@@ -967,7 +962,7 @@ lemma same_dgra_loc_Ini: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastru
 (\<forall> l \<in> nodes (graphI y).
    (\<forall> a \<in> actors_graph (graphI y).
 ((fst (snd (dgra (graphI y) a))) = l) = (a \<in> (agra (graphI y) l)))) \<close>
-  using CreditScoring.same_dgra_loc by presburger
+  using AttendanceScoring.same_dgra_loc by presburger
 
 lemma same_dgra_loc_Ini0: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow> 
        (\<forall> l \<in> nodes (graphI Ini). \<forall> a \<in> actors_graph (graphI Ini).
@@ -986,14 +981,14 @@ have a CTL formula within another one. Thereby, we can draw the pc1 as a proper 
 much simpler because we can assume that the actor is at N3 and has a salary greater than 40K 
 provided by pc1 and on that assumption we only have to show that from there we can achieve that the
 credit will be approved. \<close>
-lemma pc1_AG: \<open>\<forall> A \<in> CreditScoring_actors. M \<turnstile> AG {s. pc1 A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
-  proof (simp add: CreditScoring_actors_def M_def Credit_Kripke_def check_def, rule conjI)
-  show \<open>Ini \<in> Credit_states\<close>
-    by (simp add: Credit_states_def state_transition_refl_def)
+lemma pc1_AG: \<open>\<forall> A \<in> AttendanceScoring_actors. M \<turnstile> AG {s. pc1 A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
+  proof (simp add: AttendanceScoring_actors_def M_def Attendance_Kripke_def check_def, rule conjI)
+  show \<open>Ini \<in> Attendance_states\<close>
+    by (simp add: Attendance_states_def state_transition_refl_def)
 next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (Collect (DO ''Alice''))} \<and>
-    Ini \<in> Credit_states \<and>
+    Ini \<in> Attendance_states \<and>
     Ini \<in> AG {s. pc1 ''Bob'' s \<longrightarrow> s \<in> EF (Collect (DO ''Bob''))} \<and>
-    Ini \<in> Credit_states \<and> Ini \<in> AG {s. pc1 ''CI'' s \<longrightarrow> s \<in> EF (Collect (DO ''CI''))}\<close>
+    Ini \<in> Attendance_states \<and> Ini \<in> AG {s. pc1 ''ED'' s \<longrightarrow> s \<in> EF (Collect (DO ''ED''))}\<close>
   proof
     show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (Collect (DO ''Alice''))}\<close>
       apply (rule AG_all_sO)
@@ -1005,36 +1000,36 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
       apply (simp add: pc1_def)
       apply (erule conjE)
       apply (rule_tac y = \<open>Infrastructure (
-                             eval_graph_a ''Alice'' N3 (
-                             put_graph_a ''Alice'' N3 (graphI y))) (delta y)\<close> in EF_step_star)
+                             eval_graph_a ''Alice'' Coastal (
+                             put_graph_a ''Alice'' Coastal (graphI y))) (delta y)\<close> in EF_step_star)
          prefer 2
-       apply (simp add: eval_graph_a_def put_graph_a_def DO_def salary_def)
+       apply (simp add: eval_graph_a_def put_graph_a_def DO_def disadvantage_set_def)
          apply (subgoal_tac \<open>bb (graphI y) = bb(graphI Ini)\<close>)
         apply (subgoal_tac \<open>bb (graphI y) = black_box\<close>)
          apply (rule disjI1)
       apply (rotate_tac -1)
       apply (erule ssubst)
-         apply (simp add: black_box_def SE1_def N3_def Ini_def atI_def)
+         apply (simp add: black_box_def NonCoastal_def Coastal_def Ini_def atI_def)
          apply (subgoal_tac \<open>(fst (snd (dgra (graphI y) ''Alice''))) = Location 0\<close>)
       apply simp
          apply (subst same_dgra_loc_Ini0)
       apply (smt (z3) Collect_cong Ini_def le_boolD order_refl prod.split_sel_asm state_transition_infra_def state_transition_refl_def)
       using same_gra_loc_Ini_ini apply blast
-      using Ini_def N3_def ex_graph_def nodes_def apply auto[1]
-      using Alice_Bob_in_Credit_Kripke CreditScoring.step_rtrancl Credit_Kripke_def Credit_states_def same_actors0 stepI_C apply force
+      using Ini_def Coastal_def ex_graph_def nodes_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke AttendanceScoring.step_rtrancl Attendance_Kripke_def Attendance_states_def same_actors0 stepI_C apply force
          apply assumption
         apply (simp add: black_box_def Ini_def ex_graph_def)
          apply (rule sym, rule same_bb)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
 (* *)
-      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''Alice'' N3 (graphI y)) (delta y)\<close>)
-      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''Alice'' N3 (graphI y)) (delta y) \<rightarrow>\<^sub>i*
-                          Infrastructure (eval_graph_a ''Alice'' N3
-                                           (put_graph_a ''Alice'' N3 (graphI y))) (delta y)\<close>)
+      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''Alice'' Coastal (graphI y)) (delta y)\<close>)
+      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''Alice'' Coastal (graphI y)) (delta y) \<rightarrow>\<^sub>i*
+                          Infrastructure (eval_graph_a ''Alice'' Coastal
+                                           (put_graph_a ''Alice'' Coastal (graphI y))) (delta y)\<close>)
         apply (simp add: state_transition_infra_def state_transition_refl_def)  
        prefer 2
         apply (rule step_rtrancl)
-       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''Alice''\<close> and l = N3 in state_transition_in.put)
+       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''Alice''\<close> and l = Coastal in state_transition_in.put)
       apply (rule refl)
           apply assumption
       apply (subst same_nodes)
@@ -1043,7 +1038,7 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
         apply (rule enables_put)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
-      using Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def actors_graph_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def actors_graph_def apply auto[1]
          apply (subst same_nodes)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
@@ -1051,16 +1046,16 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
        apply (rule refl)
 (* 1 *)
          apply (rule step_rtrancl)
-        apply (rule_tac G = \<open>put_graph_a ''Alice'' N3 (graphI y)\<close> and a = \<open>''Alice''\<close> and
-                         l = N3 and c = \<open>''CI''\<close> in state_transition_in.eval)
+        apply (rule_tac G = \<open>put_graph_a ''Alice'' Coastal (graphI y)\<close> and a = \<open>''Alice''\<close> and
+                         l = Coastal and c = \<open>''ED''\<close> in state_transition_in.eval)
       apply simp
             apply (simp add: atI_def eval_graph_a_def put_graph_a_def)
       apply (smt (z3) C_def CollectI Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 nodes_def same_nodes same_nodes0 split_cong state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Attendance_Kripke CollectI Attendance_cong Attendance_Kripke_def Attendance_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
          apply (simp add: put_graph_a_def)
         apply (rule disjI1)
         apply (subgoal_tac \<open>fst (dgra (graphI Ini) ''Alice'') = fst (dgra (graphI y) ''Alice'')\<close>)
-         apply (subgoal_tac \<open>fst (dgra (graphI y) ''Alice'') = fst(dgra (put_graph_a ''Alice'' N3 (graphI y)) ''Alice'')\<close>)
+         apply (subgoal_tac \<open>fst (dgra (graphI y) ''Alice'') = fst(dgra (put_graph_a ''Alice'' Coastal (graphI y)) ''Alice'')\<close>)
           apply (unfold readers_def)
           apply (rotate_tac -1)
           apply (erule subst)
@@ -1069,22 +1064,22 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
          apply (simp add: put_graph_a_def)
         apply (rule dgra_inv)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
-        apply (simp add: Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def)
+        apply (simp add: Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def)
           apply (rule enables_eval)
           apply (simp add: state_transition_infra_def state_transition_refl_def)
-      apply (smt (verit, best) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, best) Alice_Bob_in_Attendance_Kripke CollectI Collect_cong Attendance_Kripke_def Attendance_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
       apply (smt (z3) C_def Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 le_boolD mem_Collect_eq nodes_def order_refl prod.split_sel_asm same_nodes same_nodes0 state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''Alice'' N3 (graphI y)) (delta y))) = delta y\<close>)
+      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''Alice'' Coastal (graphI y)) (delta y))) = delta y\<close>)
        apply simp
       using delta_simps by blast
-  next show \<open>Ini \<in> Credit_states \<and>
+  next show \<open>Ini \<in> Attendance_states \<and>
     Ini \<in> AG {s. pc1 ''Bob'' s \<longrightarrow> s \<in> EF (Collect (DO ''Bob''))} \<and>
-    Ini \<in> Credit_states \<and> Ini \<in> AG {s. pc1 ''CI'' s \<longrightarrow> s \<in> EF (Collect (DO ''CI''))}\<close>
+    Ini \<in> Attendance_states \<and> Ini \<in> AG {s. pc1 ''ED'' s \<longrightarrow> s \<in> EF (Collect (DO ''ED''))}\<close>
     proof
-      show \<open> Ini \<in> Credit_states\<close>     
-        by (simp add: Credit_states_def state_transition_refl_def)
+      show \<open> Ini \<in> Attendance_states\<close>     
+        by (simp add: Attendance_states_def state_transition_refl_def)
     next show \<open>Ini \<in> AG {s. pc1 ''Bob'' s \<longrightarrow> s \<in> EF (Collect (DO ''Bob''))} \<and>
-    Ini \<in> Credit_states \<and> Ini \<in> AG {s. pc1 ''CI'' s \<longrightarrow> s \<in> EF (Collect (DO ''CI''))} \<close>
+    Ini \<in> Attendance_states \<and> Ini \<in> AG {s. pc1 ''ED'' s \<longrightarrow> s \<in> EF (Collect (DO ''ED''))} \<close>
       proof 
         show \<open>Ini \<in> AG {s. pc1 ''Bob'' s \<longrightarrow> s \<in> EF (Collect (DO ''Bob''))}\<close>
       apply (rule AG_all_sO)
@@ -1095,36 +1090,36 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
       apply (simp add: pc1_def)
       apply (erule conjE)
       apply (rule_tac y = \<open>Infrastructure (
-                             eval_graph_a ''Bob'' N3 (
-                             put_graph_a ''Bob'' N3 (graphI y))) (delta y)\<close> in EF_step_star)
+                             eval_graph_a ''Bob'' Coastal (
+                             put_graph_a ''Bob'' Coastal (graphI y))) (delta y)\<close> in EF_step_star)
            prefer 2
-       apply (simp add: eval_graph_a_def put_graph_a_def DO_def salary_def)
+       apply (simp add: eval_graph_a_def put_graph_a_def DO_def disadvantage_set_def)
          apply (subgoal_tac \<open>bb (graphI y) = bb(graphI Ini)\<close>)
         apply (subgoal_tac \<open>bb (graphI y) = black_box\<close>)
          apply (rule disjI1)
       apply (rotate_tac -1)
       apply (erule ssubst)
-         apply (simp add: black_box_def SE1_def N3_def Ini_def atI_def)
+         apply (simp add: black_box_def NonCoastal_def Coastal_def Ini_def atI_def)
          apply (subgoal_tac \<open>(fst (snd (dgra (graphI y) ''Bob''))) = Location 0\<close>)
       apply simp
          apply (subst same_dgra_loc_Ini0)
       apply (smt (z3) Collect_cong Ini_def le_boolD order_refl prod.split_sel_asm state_transition_infra_def state_transition_refl_def)
       using same_gra_loc_Ini_ini apply blast
-      using Ini_def N3_def ex_graph_def nodes_def apply auto[1]
-      using Alice_Bob_in_Credit_Kripke CreditScoring.step_rtrancl Credit_Kripke_def Credit_states_def same_actors0 stepI_C apply force
+      using Ini_def Coastal_def ex_graph_def nodes_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke AttendanceScoring.step_rtrancl Attendance_Kripke_def Attendance_states_def same_actors0 stepI_C apply force
          apply assumption
         apply (simp add: black_box_def Ini_def ex_graph_def)
          apply (rule sym, rule same_bb)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
 (* *)
-      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''Bob'' N3 (graphI y)) (delta y)\<close>)
-      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''Bob'' N3 (graphI y)) (delta y) \<rightarrow>\<^sub>i*
-                          Infrastructure (eval_graph_a ''Bob'' N3
-                                           (put_graph_a ''Bob'' N3 (graphI y))) (delta y)\<close>)
+      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''Bob'' Coastal (graphI y)) (delta y)\<close>)
+      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''Bob'' Coastal (graphI y)) (delta y) \<rightarrow>\<^sub>i*
+                          Infrastructure (eval_graph_a ''Bob'' Coastal
+                                           (put_graph_a ''Bob'' Coastal (graphI y))) (delta y)\<close>)
         apply (simp add: state_transition_infra_def state_transition_refl_def)  
        prefer 2
         apply (rule step_rtrancl)
-       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''Bob''\<close> and l = N3 in state_transition_in.put)
+       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''Bob''\<close> and l = Coastal in state_transition_in.put)
       apply (rule refl)
           apply assumption
       apply (subst same_nodes)
@@ -1133,7 +1128,7 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
         apply (rule enables_put)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
-      using Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def actors_graph_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def actors_graph_def apply auto[1]
          apply (subst same_nodes)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
@@ -1141,16 +1136,16 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
        apply (rule refl)
 (* 1 *)
          apply (rule step_rtrancl)
-        apply (rule_tac G = \<open>put_graph_a ''Bob'' N3 (graphI y)\<close> and a = \<open>''Bob''\<close> and
-                         l = N3 and c = \<open>''CI''\<close> in state_transition_in.eval)
+        apply (rule_tac G = \<open>put_graph_a ''Bob'' Coastal (graphI y)\<close> and a = \<open>''Bob''\<close> and
+                         l = Coastal and c = \<open>''ED''\<close> in state_transition_in.eval)
       apply simp
             apply (simp add: atI_def eval_graph_a_def put_graph_a_def)
       apply (smt (z3) C_def CollectI Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 nodes_def same_nodes same_nodes0 split_cong state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Attendance_Kripke CollectI Attendance_cong Attendance_Kripke_def Attendance_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
          apply (simp add: put_graph_a_def)
         apply (rule disjI1)
         apply (subgoal_tac \<open>fst (dgra (graphI Ini) ''Bob'') = fst (dgra (graphI y) ''Bob'')\<close>)
-         apply (subgoal_tac \<open>fst (dgra (graphI y) ''Bob'') = fst(dgra (put_graph_a ''Bob'' N3 (graphI y)) ''Bob'')\<close>)
+         apply (subgoal_tac \<open>fst (dgra (graphI y) ''Bob'') = fst(dgra (put_graph_a ''Bob'' Coastal (graphI y)) ''Bob'')\<close>)
           apply (unfold readers_def)
           apply (rotate_tac -1)
           apply (erule subst)
@@ -1159,19 +1154,19 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
          apply (simp add: put_graph_a_def)
         apply (rule dgra_inv)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
-        apply (simp add: Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def)
+        apply (simp add: Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def)
           apply (rule enables_eval)
           apply (simp add: state_transition_infra_def state_transition_refl_def)
-      apply (smt (verit, best) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, best) Alice_Bob_in_Attendance_Kripke CollectI Collect_cong Attendance_Kripke_def Attendance_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
       apply (smt (z3) C_def Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 le_boolD mem_Collect_eq nodes_def order_refl prod.split_sel_asm same_nodes same_nodes0 state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''Alice'' N3 (graphI y)) (delta y))) = delta y\<close>)
+      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''Alice'' Coastal (graphI y)) (delta y))) = delta y\<close>)
        apply simp
       using delta_simps by blast
-  next show \<open>Ini \<in> Credit_states \<and> Ini \<in> AG {s. pc1 ''CI'' s \<longrightarrow> s \<in> EF (Collect (DO ''CI''))} \<close>
+  next show \<open>Ini \<in> Attendance_states \<and> Ini \<in> AG {s. pc1 ''ED'' s \<longrightarrow> s \<in> EF (Collect (DO ''ED''))} \<close>
         proof 
-          show \<open>Ini \<in> Credit_states\<close>
-        by (simp add: Credit_states_def state_transition_refl_def)
-    next show \<open> Ini \<in> AG {s. pc1 ''CI'' s \<longrightarrow> s \<in> EF (Collect (DO ''CI''))} \<close>
+          show \<open>Ini \<in> Attendance_states\<close>
+        by (simp add: Attendance_states_def state_transition_refl_def)
+    next show \<open> Ini \<in> AG {s. pc1 ''ED'' s \<longrightarrow> s \<in> EF (Collect (DO ''ED''))} \<close>
       apply (rule AG_all_sO)
       apply (rule allI, rule impI)
       apply (rule CollectI)
@@ -1180,8 +1175,8 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
       apply (simp add: pc1_def)
       apply (erule conjE)
       apply (rule_tac y = \<open>Infrastructure (
-                             eval_graph_a ''CI'' N3 (
-                             put_graph_a ''CI'' N3 (graphI y))) (delta y)\<close> in EF_step_star)
+                             eval_graph_a ''ED'' Coastal (
+                             put_graph_a ''ED'' Coastal (graphI y))) (delta y)\<close> in EF_step_star)
            prefer 2
        apply (simp add: eval_graph_a_def put_graph_a_def DO_def salary_def)
          apply (subgoal_tac \<open>bb (graphI y) = bb(graphI Ini)\<close>)
@@ -1189,27 +1184,27 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
          apply (rule disjI1)
       apply (rotate_tac -1)
       apply (erule ssubst)
-         apply (simp add: black_box_def SE1_def N3_def Ini_def atI_def)
-         apply (subgoal_tac \<open>(fst (snd (dgra (graphI y) ''CI''))) = Location 0\<close>)
+         apply (simp add: black_box_def NonCoastal_def Coastal_def Ini_def atI_def)
+         apply (subgoal_tac \<open>(fst (snd (dgra (graphI y) ''ED''))) = Location 0\<close>)
       apply simp
          apply (subst same_dgra_loc_Ini0)
       apply (smt (z3) Collect_cong Ini_def le_boolD order_refl prod.split_sel_asm state_transition_infra_def state_transition_refl_def)
       using same_gra_loc_Ini_ini apply blast
-      using Ini_def N3_def ex_graph_def nodes_def apply auto[1]
-      using Alice_Bob_in_Credit_Kripke CreditScoring.step_rtrancl Credit_Kripke_def Credit_states_def same_actors0 stepI_C apply force
+      using Ini_def Coastal_def ex_graph_def nodes_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke AttendanceScoring.step_rtrancl Attendance_Kripke_def Attendance_states_def same_actors0 stepI_C apply force
          apply assumption
         apply (simp add: black_box_def Ini_def ex_graph_def)
          apply (rule sym, rule same_bb)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
 (* *)
-      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''CI'' N3 (graphI y)) (delta y)\<close>)
-      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''CI'' N3 (graphI y)) (delta y) \<rightarrow>\<^sub>i*
-                          Infrastructure (eval_graph_a ''CI'' N3
-                                           (put_graph_a ''CI'' N3 (graphI y))) (delta y)\<close>)
+      apply (subgoal_tac \<open>y \<rightarrow>\<^sub>i*  Infrastructure (put_graph_a ''ED'' Coastal (graphI y)) (delta y)\<close>)
+      apply (subgoal_tac \<open>Infrastructure (put_graph_a ''ED'' Coastal (graphI y)) (delta y) \<rightarrow>\<^sub>i*
+                          Infrastructure (eval_graph_a ''ED'' Coastal
+                                           (put_graph_a ''ED'' Coastal (graphI y))) (delta y)\<close>)
         apply (simp add: state_transition_infra_def state_transition_refl_def)  
        prefer 2
         apply (rule step_rtrancl)
-       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''CI''\<close> and l = N3 in state_transition_in.put)
+       apply (rule_tac G = \<open>graphI y\<close> and a = \<open>''ED''\<close> and l = Coastal in state_transition_in.put)
       apply (rule refl)
           apply assumption
       apply (subst same_nodes)
@@ -1218,7 +1213,7 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
         apply (rule enables_put)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
-      using Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def actors_graph_def apply auto[1]
+      using Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def actors_graph_def apply auto[1]
          apply (subst same_nodes)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
               apply (simp add: actors_graph_def atI_def)
@@ -1226,16 +1221,16 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
        apply (rule refl)
 (* 1 *)
          apply (rule step_rtrancl)
-        apply (rule_tac G = \<open>put_graph_a ''CI'' N3 (graphI y)\<close> and a = \<open>''CI''\<close> and
-                         l = N3 and c = \<open>''CI''\<close> in state_transition_in.eval)
+        apply (rule_tac G = \<open>put_graph_a ''ED'' Coastal (graphI y)\<close> and a = \<open>''ED''\<close> and
+                         l = Coastal and c = \<open>''ED''\<close> in state_transition_in.eval)
       apply simp
             apply (simp add: atI_def eval_graph_a_def put_graph_a_def)
       apply (smt (z3) C_def CollectI Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 nodes_def same_nodes same_nodes0 split_cong state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, ccfv_SIG) Alice_Bob_in_Attendance_Kripke CollectI Attendance_cong Attendance_Kripke_def Attendance_states_def graphI_simps insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
          apply (simp add: put_graph_a_def)
         apply (rule disjI2)
-        apply (subgoal_tac \<open>fst (dgra (graphI Ini) ''CI'') = fst (dgra (graphI y) ''CI'')\<close>)
-         apply (subgoal_tac \<open>fst (dgra (graphI y) ''CI'') = fst(dgra (put_graph_a ''CI'' N3 (graphI y)) ''CI'')\<close>)
+        apply (subgoal_tac \<open>fst (dgra (graphI Ini) ''ED'') = fst (dgra (graphI y) ''ED'')\<close>)
+         apply (subgoal_tac \<open>fst (dgra (graphI y) ''ED'') = fst(dgra (put_graph_a ''ED'' Coastal (graphI y)) ''ED'')\<close>)
           apply (unfold owner_def)
           apply (rotate_tac -1)
           apply (erule subst)
@@ -1244,12 +1239,12 @@ next show \<open>Ini \<in> AG {s. pc1 ''Alice'' s \<longrightarrow> s \<in> EF (
          apply (simp add: put_graph_a_def)
         apply (rule dgra_inv)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
-        apply (simp add: Alice_Bob_in_Credit_Kripke Credit_Kripke_def Credit_states_def)
+        apply (simp add: Alice_Bob_in_Attendance_Kripke Attendance_Kripke_def Attendance_states_def)
           apply (rule enables_eval)
           apply (simp add: state_transition_infra_def state_transition_refl_def)
-      apply (smt (verit, best) Alice_Bob_in_Credit_Kripke CollectI Collect_cong Credit_Kripke_def Credit_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
+      apply (smt (verit, best) Alice_Bob_in_Attendance_Kripke CollectI Collect_cong Attendance_Kripke_def Attendance_states_def insertI1 insert_commute le_boolD order_refl prod.split_sel_asm same_actors state_transition_infra_def state_transition_refl_def states.simps)
       apply (smt (z3) C_def CollectI Collect_cong ex_graph'_def igraph.sel(1) graphI_simps insertI1 nodes_def same_nodes same_nodes0 split_cong state_transition_infra_def state_transition_refl_def stepI_C)
-      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''CI'' N3 (graphI y)) (delta y))) = delta y\<close>)
+      apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''ED'' Coastal (graphI y)) (delta y))) = delta y\<close>)
        apply simp
       using delta_simps by blast
     qed
