@@ -32,7 +32,7 @@ defines ex_loc_ass'_def: "ex_loc_ass' \<equiv>
 (* data *)
 fixes ex_data :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data_def: \<open>ex_data \<equiv> (\<lambda> x :: identity. 
-                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal,{fsm}, male, primary, winter, bad, white))
+                                     (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal,{fsm}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
                                                  ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {fsm, sen}, female, secondary, winter, good, black))
                                       else (if x = ''Charlie'' then
@@ -40,26 +40,30 @@ defines ex_data_def: \<open>ex_data \<equiv> (\<lambda> x :: identity.
                                             else (if x = ''ED'' then 
                                                  ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good, white))
                                                   else 
-                                                    ((Actor '''',{}),(London,{},null,primary, winter, good, white)))))))\<close>
+                                                    ((Actor '''',{}),(London,{},null,secondary, winter, good, white)))))))\<close>
 
 fixes ex_data' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data'_def: \<open>ex_data' \<equiv> (\<lambda> x :: identity. 
                                      (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
                                                  ((Actor ''Alice'',{Actor ''ED''}),(NonCoastal, {fsm, sen}, female, secondary, winter, good, black))
+                                      else (if x = ''Charlie'' then
+                                                  ((Actor ''Charlie'',{Actor ''ED''}),(London, {fsm, sen, ehc}, null, secondary, winter, bad, asian))
                                             else (if x = ''ED'' then 
                                                  ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good,  white))
                                                   else 
-                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good,  white))))))\<close>
+                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good,  white)))))))\<close>
 fixes ex_data'' :: "identity \<Rightarrow> (dlm \<times> data)"
 defines ex_data''_def: \<open>ex_data'' \<equiv> (\<lambda> x :: identity. 
                                      (if x = ''Bob'' then ((Actor ''Bob'',{Actor ''ED''}),(Coastal, {}, male, primary, winter, good, white))
                                       else (if x = ''Alice'' then 
                                                  ((Actor ''Alice'',{Actor ''ED''}),(Coastal, {fsm, sen}, female, secondary, winter, good, black))
+                                      else (if x = ''Charlie'' then
+                                                  ((Actor ''Charlie'',{Actor ''ED''}),(London, {fsm, sen, ehc}, null, secondary, winter, bad, asian))
                                             else (if x = ''ED'' then 
                                                  ((Actor ''ED'',{}), (London, {fsm, sen, ehc, csc}, null, secondary, winter, good, white))
                                                   else 
-                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good, white))))))\<close>
+                                                    ((Actor '''',{}),(London, {}, null, secondary, winter, good, white)))))))\<close>
 
 
 fixes black_box::  "(data \<Rightarrow> bool)"
@@ -269,21 +273,26 @@ next show \<open> CC = Infrastructure (eval_graph_a ''Bob'' (graphI C)) (delta C
 qed
 
 
-(*lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
-proof (rule_tac l = Coastal and a = "''Bob''" and m = "0" in get)
+lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
+proof (rule_tac l = Coastal and a = "''Bob''" and d = fsm in delete)
   show "graphI CC = graphI CC" by (rule refl)
 next show "''Bob'' @\<^bsub>graphI CC\<^esub> Coastal"
     by (simp add: CC_def atI_def ex_graph''_def ex_loc_ass_def) 
 next show \<open>Coastal \<in> nodes (graphI CC)\<close>
     using CC_def ex_graph''_def nodes_def by auto
-next show \<open>enables CC Coastal (Actor ''Bob'') get\<close>
+next show \<open>enables CC Coastal (Actor ''Bob'') delete\<close>
     by (simp add: CC_def enables_def local_policies_def)
-next show \<open>Ca = Infrastructure (get_graph_a ''Bob'' Coastal 0 (graphI CC)) (delta CC) \<close>
-    apply (simp add: get_graph_a_def CC_def Ca_def ex_graph''_def ex_graph'''_def ex_data_def ex_data'_def)
+next show \<open>fsm \<in> fst (snd (snd (dgra (graphI CC) ''Bob'')))\<close>
+    by (simp add: CC_def ex_graph''_def ex_data_def)
+next show \<open>''Bob'' \<in> actors_graph (graphI CC)\<close>
+    by (simp add: CC_def actors_graph_def ex_graph''_def ex_loc_ass_def London_def NonCoastal_def Coastal_def
+            nodes_def, force)
+next show \<open>Ca = Infrastructure (delete_graph_a ''Bob'' fsm(graphI CC)) (delta CC) \<close>
+    apply (simp add: delete_graph_a_def CC_def Ca_def ex_graph''_def ex_graph'''_def ex_data_def ex_data'_def)
     apply (rule ext)
     by force
 qed
-*)
+
 (*
 lemma stepCa_CCa: "Ca  \<rightarrow>\<^sub>n CCa"
 proof (rule_tac l = Coastal and a = "''Bob''" in put)
