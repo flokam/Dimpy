@@ -68,17 +68,32 @@ defines black_box_def: \<open>black_box \<equiv> (\<lambda> (d :: data).
                              else (if (fst d = NonCoastal) then (card(fst(snd d)) \<le> 1) 
                               else (if (fst d = London) then (card(fst(snd d)) \<le> 2) else False))))\<close>
 
-fixes ex_attendance :: \<open>identity \<Rightarrow> bool\<close>
-defines ex_attendance_def: \<open>ex_attendance \<equiv>(\<lambda> x. False)\<close>
+fixes ex_attendance :: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance_def: \<open>ex_attendance \<equiv> {}\<close>
 
-fixes ex_attendance' :: \<open>identity \<Rightarrow> bool\<close>
-defines ex_attendance'_def: \<open>ex_attendance' \<equiv> (\<lambda> x. if x = ''Bob'' then True else False)\<close>
+fixes ex_attendance' :: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance'_def: \<open>ex_attendance' \<equiv> {(''Bob'', None)}\<close>
 
-fixes ex_attendance'':: \<open>identity \<Rightarrow> bool\<close>
-defines ex_attendance''_def: \<open>ex_attendance'' \<equiv> (\<lambda> x. if x \<in> {''Bob'', ''Alice''} then True else False)\<close>
+fixes ex_attendance'':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''_def: \<open>ex_attendance'' \<equiv> {(''Bob'', Some(False))}\<close>
 
-fixes ex_attendance''':: \<open>identity \<Rightarrow> bool\<close>
-defines ex_attendance'''_def: \<open>ex_attendance''' \<equiv> (\<lambda> x. if x \<in> {''Bob'', ''Alice'', ''Charlie''} then True else False)\<close>
+fixes ex_attendance''a:: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''a_def: \<open>ex_attendance''a \<equiv> {(''Bob'', None), (''Bob'', Some(False))}\<close>
+
+fixes ex_attendance''':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance'''_def: \<open>ex_attendance''' \<equiv> {(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+
+fixes ex_attendance'''':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendance''''_def: \<open>ex_attendance'''' \<equiv> {(''Alice'', None),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+
+fixes ex_attendanceV:: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV_def: \<open>ex_attendanceV \<equiv> {(''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+
+fixes ex_attendanceV':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV'_def: \<open>ex_attendanceV' \<equiv> {(''Alice'', None), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
+
+fixes ex_attendanceV'':: \<open>(identity \<times> bool option)set\<close>
+defines ex_attendanceV''_def: \<open>ex_attendanceV'' \<equiv> {(''Alice'', Some(True)), (''Alice'', Some(False)),(''Bob'', Some(True)), (''Bob'', Some(False))}\<close>
 
 
 (* Graphs for the various states: initial*)
@@ -95,27 +110,25 @@ defines ex_graph'_def: "ex_graph' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal
 (* ED evaluates Bob's application negatively *)
 fixes ex_graph'' :: "igraph"
 defines ex_graph''_def: "ex_graph'' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data black_box ex_attendance'"
+                                         ex_loc_ass ex_data black_box ex_attendance''"
 
 
 (* Next try: now from previous state Bob actions a get to get a disadvantage set change *)
 fixes ex_graph''' :: "igraph"
 defines ex_graph'''_def: "ex_graph''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_attendance'"
+                                         ex_loc_ass ex_data' black_box ex_attendance''"
 
 (* Bob puts in a attendance application *)
 fixes ex_graph'''' :: "igraph"
 defines ex_graph''''_def: "ex_graph'''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal, London),(NonCoastal,London)} 
-                                         ex_loc_ass ex_data' black_box ex_attendance"
+                                         ex_loc_ass ex_data' black_box ex_attendance''a"
 
-(*
 (* ED evaluates Bob's application - this time positive *)
 fixes ex_graphV :: "igraph"
 defines ex_graphV_def: "ex_graphV \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance'''"
-*)
 
-(*
+
 (* Now, Alice puts in a attendance application *)
 fixes ex_graphV' :: "igraph"
 defines ex_graphV'_def: "ex_graphV' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
@@ -123,7 +136,7 @@ defines ex_graphV'_def: "ex_graphV' \<equiv> Lgraph {(Coastal,NonCoastal),(Coast
 
 (* Alice's application is evaluated by ED to negative *)
 fixes ex_graphV'' :: "igraph"
-defines ex_graphV''_def: "ex_graphV'' \<equiv> Lgraph {(Coastal,NonCoastal),(NonCoastal,London),(Noncoastal,London)} 
+defines ex_graphV''_def: "ex_graphV'' \<equiv> Lgraph {(Coastal,NonCoastal),(NonCoastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendanceV"
 
 (* Alice now moves to Coastal *)
@@ -140,17 +153,16 @@ defines ex_graphV''''_def: "ex_graphV'''' \<equiv> Lgraph {(Coastal,NonCoastal),
 fixes ex_graphX :: "igraph"
 defines ex_graphX_def: "ex_graphX \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass' ex_data'' black_box ex_attendanceV''"
-*)
 
 fixes local_policies :: "[igraph, location] \<Rightarrow> policy set"
 defines local_policies_def: "local_policies G \<equiv> 
-    (\<lambda> x. if x = Coastal then  {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
-                                   (\<lambda> y. True, {move})}
-          else (if x = NonCoastal then {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
-                                   (\<lambda> y. True, {move})} 
+    (\<lambda> x. if x = Coastal then  {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {eval}), 
+                                   (\<lambda> y. True, {put,delete,move})}
+          else (if x = NonCoastal then {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {eval}), 
+                                   (\<lambda> y. True, {put,delete,move})} 
                 else (if x = London then 
-                         {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {move,put,delete,eval}), 
-                                    (\<lambda> y. True, {move})} 
+                         {(\<lambda> y. if (y = (Actor ''ED'')) then True else False, {eval}), 
+                                    (\<lambda> y. True, {put,delete,move})} 
                       else {})))"
 
 (* scenario states *)
@@ -201,13 +213,13 @@ defines M_def: \<open>M \<equiv> Attendance_Kripke\<close>
 
 (* The desirable outcome DO *)
 fixes DO :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> bool\<close>
-defines DO_def: \<open>DO a s \<equiv> attendance (graphI s) a\<close>
+defines DO_def: \<open>DO a s \<equiv> (a, Some True) \<in> attendance (graphI s)\<close>
 
 
 fixes ndobob
 defines ndobob_def: \<open>ndobob \<equiv> {(s :: infrastructure). \<not>(DO ''Bob''  s)}\<close>
 
-fixes disadvantage_set :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> disadvantaged set\<close>
+fixes disadvantage_set :: \<open>identity \<Rightarrow> infrastructure \<Rightarrow> disadvantage set\<close>
 defines disadvantage_set_def : \<open>(disadvantage_set a s) \<equiv> (fst (snd (snd(dgra (graphI s) a))))\<close>
 
 fixes pc0 
