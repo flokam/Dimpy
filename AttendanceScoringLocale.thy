@@ -113,7 +113,7 @@ defines ex_graph''_def: "ex_graph'' \<equiv> Lgraph {(Coastal,NonCoastal),(Coast
                                          ex_loc_ass ex_data black_box ex_attendance''"
 
 
-(* Next try: now from previous state Bob actions a get to get a disadvantage set change *)
+(* Next try: now from previous state Bob actions a del to get a disadvantage set removal *)
 fixes ex_graph''' :: "igraph"
 defines ex_graph'''_def: "ex_graph''' \<equiv> Lgraph {(Coastal,NonCoastal),(Coastal,London),(NonCoastal,London)} 
                                          ex_loc_ass ex_data' black_box ex_attendance''"
@@ -178,11 +178,8 @@ defines CC_def: \<open>CC \<equiv> Infrastructure ex_graph'' local_policies\<clo
 fixes Ca :: \<open>infrastructure\<close>
 defines Ca_def: \<open>Ca \<equiv> Infrastructure ex_graph''' local_policies\<close>
 
-
 fixes CCa :: \<open>infrastructure\<close>
 defines CCa_def: \<open>CCa \<equiv> Infrastructure ex_graph'''' local_policies\<close>
-
-(*
 
 fixes CCCa :: \<open>infrastructure\<close>
 defines CCCa_def: \<open>CCCa \<equiv> Infrastructure ex_graphV local_policies\<close>
@@ -202,7 +199,6 @@ defines CCc_def: \<open>CCc \<equiv> Infrastructure ex_graphV'''' local_policies
 fixes CCCc :: \<open>infrastructure\<close>
 defines CCCc_def: \<open>CCCc \<equiv> Infrastructure ex_graphX local_policies\<close>
 
-*)
 (* The School Attendance Kripke structure *)
 fixes Attendance_states
 defines Attendance_states_def: \<open>Attendance_states \<equiv> {s. Ini \<rightarrow>\<^sub>i* s }\<close>
@@ -239,27 +235,21 @@ begin
 
 (* lemmas for the state transitions: a bit tedious but almost all done by sledgehammer automatically*)
 lemma stepI_C: "Ini  \<rightarrow>\<^sub>n C"
-  sorry
-(*
-proof (rule_tac l = Coastal and a = "''Bob''" and c = "''ED''" in eval)
+proof (rule_tac l = Coastal and a = "''Bob''"  in put)
   show "graphI Ini = graphI Ini" by (rule refl)
 next show "''Bob'' @\<^bsub>graphI Ini\<^esub> Coastal"
     by (simp add: Ini_def atI_def ex_graph_def ex_loc_ass_def)
 next show "Coastal \<in> nodes (graphI Ini)"
     using Ini_def ex_graph_def nodes_def by auto
-next show \<open>''ED'' \<in> actors_graph (graphI Ini)\<close>
-    by (simp add: Ini_def atI_def ex_graph_def actors_graph_def nodes_def ex_loc_ass_def London_def 
-                     NonCoastal_def Coastal_def, blast)
 next show \<open>enables Ini Coastal (Actor ''Bob'') put\<close>
     by (simp add: Ini_def  enables_def local_policies_def)
 next show \<open>C = Infrastructure (put_graph_a ''Bob'' Coastal (graphI Ini)) (delta Ini)\<close>
-    by (simp add: C_def Ini_def ex_graph'_def ex_graph_def ex_attendance'_def ex_attendance_def put_graph_a_def)
+    by (simp add: C_def Ini_def ex_graph_def ex_graph'_def ex_attendance_def ex_attendance'_def
+    put_graph_a_def)
 qed
-*)
+
 
 lemma stepC_CC: "C  \<rightarrow>\<^sub>n CC"
-  sorry
-(*
 proof (rule_tac l = Coastal and a = "''Bob''" and c = "''ED''" in eval)
   show \<open>graphI C = graphI C\<close> by (rule refl)
 next show \<open>''Bob'' @\<^bsub>graphI C\<^esub> Coastal\<close>
@@ -269,18 +259,15 @@ next show \<open>Coastal \<in> nodes (graphI C)\<close>
 next show \<open>''ED'' \<in> actors_graph (graphI C)\<close>
     apply (simp add: actors_graph_def)
     by (simp add: C_def ex_graph'_def ex_loc_ass_def London_def NonCoastal_def Coastal_def nodes_def, blast)
-next show "(''Bob'', None) \<in> attendance (graphI C)"
-    by (simp add: C_def ex_graph'_def ex_attendance'_def)
-
-next show \<open> Actor ''ED'' \<in> readers (dgra (graphI C) ''Bob'') \<or> Actor ''ED'' = owner (dgra (graphI C) ''Bob'')\<close>
-    by (simp add: readers_def C_def ex_graph'_def ex_data_def)
+next show \<open>Actor ''ED'' \<in> readers (dgra (graphI C) ''Bob'') \<or> Actor ''ED'' = owner (dgra (graphI C) ''Bob'')\<close>
+    by (simp add: C_def ex_graph'_def ex_data_def readers_def)
 next show \<open>enables C Coastal (Actor ''ED'') eval\<close>
     by (simp add: C_def enables_def local_policies_def)
-next show "CC = Infrastructure (eval_graph_a ''Bob'' Coastal (graphI C)) (delta C)"
-    by (simp add: eval_graph_a_def C_def CC_def ex_graph'_def ex_graph''_def black_box_def 
-                    ex_attendance''_def ex_attendance'_def ex_data_def)
+next show \<open> CC = Infrastructure (eval_graph_a ''Bob'' (graphI C)) (delta C)\<close>
+    by (simp add: CC_def ex_graph''_def ex_attendance''_def eval_graph_a_def ex_loc_ass_def 
+           ex_data_def C_def ex_graph'_def ex_attendance'_def black_box_def local_policies_def)
 qed
-*)
+
 
 (*lemma stepCC_Ca: "CC  \<rightarrow>\<^sub>n Ca"
 proof (rule_tac l = Coastal and a = "''Bob''" and m = "0" in get)

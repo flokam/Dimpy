@@ -34,13 +34,13 @@ datatype gender = male | female | null
 datatype ethnicity = black |  white | asian
 (* special educational needs, free school meal, education and  health care and child in social care,
    ... *)
-datatype disadvantaged = sen | fsm | ehc | csc 
+datatype disadvantage = sen | fsm | ehc | csc 
 datatype year = primary | secondary
 (* nursery | reception | year1 | year2 | year3 | year4
   | year5 |year6 | year7 | year8 | year9 | year10 | year11 | year12 *)
 datatype season = winter | spring | summer | autumn
 datatype transport = good | bad
-type_synonym data = \<open>location \<times> disadvantaged set \<times> gender \<times> year \<times> season \<times> transport \<times> ethnicity \<close>
+type_synonym data = \<open>location \<times> disadvantage set \<times> gender \<times> year \<times> season \<times> transport \<times> ethnicity \<close>
 type_synonym dlm = \<open>actor \<times> actor set\<close>
 type_synonym absence = nat
 
@@ -49,7 +49,7 @@ datatype igraph = Lgraph
                     (agra: \<open>location \<Rightarrow> identity set\<close>)
                     (dgra: \<open> identity \<Rightarrow> dlm \<times> data\<close>)
                     (bb: \<open> data \<Rightarrow> bool\<close>)
-                    (attendance: \<open>identity \<Rightarrow> bool\<close>)
+                    (attendance: \<open>(identity \<times> bool option)set\<close>)
 
 datatype infrastructure = 
          Infrastructure (graphI: \<open>igraph\<close>)
@@ -136,11 +136,8 @@ where "move_graph_a n l l' G \<equiv> Lgraph (gra G)
                     (bb G)(attendance G)"
 
 definition put_graph_a 
-  where "put_graph_a a d G \<equiv> (Lgraph (gra G)(agra G)
-                ((dgra G)(a := (fst(dgra G a), 
-                          (fst (snd (dgra G a)), 
-                             insert d (fst(snd(snd(dgra G a)))), snd(snd(snd (dgra G a)))))))
-                                      (bb G)(attendance G))"
+  where "put_graph_a a l G \<equiv> (Lgraph (gra G)(agra G)(dgra G)(bb G)
+                                      (insert (a, None)(attendance G)))"
 
 definition delete_graph_a 
   where "delete_graph_a a d G \<equiv> (Lgraph (gra G)(agra G)
@@ -151,7 +148,7 @@ definition delete_graph_a
 
 definition eval_graph_a
   where "eval_graph_a a G \<equiv> (Lgraph (gra G)(agra G)(dgra G)(bb G)
-                          ((attendance G)(a := (bb G (snd (dgra G a))))))"
+                          (insert (a, Some (bb G (snd (dgra G a))))(attendance G - {(a, None)})))"
 
 
 text \<open>The state transition relation defines the semantics for the actions. We concentrate
@@ -172,7 +169,7 @@ move: "\<lbrakk> G = graphI I; a @\<^bsub>G\<^esub> l; l \<in> nodes G; l' \<in>
 | put : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow> 
           enables I l (Actor a) put \<Longrightarrow>
           I' = Infrastructure 
-                  (put_graph_a a d G)
+                  (put_graph_a a l G)
                   (delta I) \<Longrightarrow>
           I \<rightarrow>\<^sub>n I'" 
 | delete : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow> 
