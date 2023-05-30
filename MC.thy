@@ -424,6 +424,11 @@ proof (simp add: state_transition_refl_def)
     by (erule rtrancl_induct) (auto simp add: AG_step)
 qed
 
+lemma AG_all_s':  " x \<rightarrow>\<^sub>i* y \<Longrightarrow> x \<in> AG s \<Longrightarrow> y \<in> s"
+  apply (rule AG_in_lem)
+  by (erule AG_all_s)
+
+
 lemma AG_all_sO: "\<forall> y. x \<rightarrow>\<^sub>i* y \<longrightarrow> y \<in> s \<Longrightarrow> x \<in> AG s"
 proof (simp add: state_transition_refl_def)
   show " \<forall>y. (x, y) \<in> {(x, y). x \<rightarrow>\<^sub>i y}\<^sup>* \<longrightarrow> y \<in> s \<Longrightarrow> x \<in> AG s "

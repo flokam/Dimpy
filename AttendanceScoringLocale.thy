@@ -224,6 +224,8 @@ fixes pc2
 defines pc2_def: \<open>pc2 A s \<equiv> ((card(disadvantage_set A s) \<le> 1) \<and> (A  @\<^bsub>(graphI s)\<^esub> NonCoastal))\<close>
 fixes pc3
 defines pc3_def: \<open>pc3 A s \<equiv> ((card(disadvantage_set A s) \<le> 2) \<and> (A  @\<^bsub>(graphI s)\<^esub> London))\<close>
+fixes pcipI
+defines pcipI_def: \<open>pcipI A s \<equiv> pc1 A s \<or> pc2 A s \<or> pc3 A s\<close>
 
 begin 
 
@@ -530,7 +532,7 @@ qed
 *)
 
 (* Application of counterfactuals to find that the closest state to  CCb where DO holds is CCc.
-   This isnpires the next precondition pc1 as in CCCc we have 
+   This inspires the next precondition pc1 as in CCCc we have 
    salary A s \<ge> 0 \<and> A  @\<^bsub>(graphI s)\<^esub> Coastal) *)
 (*lemma counterfactual_CCCc: \<open>CCCc \<in> (counterfactuals CCb (\<lambda> s. DO ''Alice'' s))\<close>
   apply (simp add: counterfactuals_def)
@@ -720,65 +722,6 @@ lemma enables_move: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure
   using enables_move0 by blast
 
 
-(*
-lemma enables_get0: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
-           \<forall> a \<in> actors_graph (graphI y). \<forall> l \<in> nodes (graphI y). enables y l (Actor a) get\<close>
-proof (erule rtrancl_induct)
-  show \<open>\<forall>a\<in>actors_graph (graphI Ini). \<forall>l\<in>nodes (graphI Ini). enables Ini l (Actor a) get\<close>
-    by (simp add: Ini_def enables_def ex_graph_def local_policies_def nodes_def)
-next show \<open>\<And>y z. (Ini, y) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
-           (y, z) \<in> {(x, y). x \<rightarrow>\<^sub>n y} \<Longrightarrow>
-           \<forall>a\<in>actors_graph (graphI y). \<forall>l\<in>nodes (graphI y). enables y l (Actor a) get \<Longrightarrow>
-           \<forall>a\<in>actors_graph (graphI z). \<forall>l\<in>nodes (graphI z). enables z l (Actor a) get \<close>
-    apply (clarify, simp add: Ini_def ex_graph_def local_policies_def  nodes_def enables_def
-         London_def Coastal_def NonCoastal_def, erule exE)
-    apply (erule state_transition_in.cases)
-    apply (smt (z3) Coastal_def delta_simps igraph.sel(1) graphI_simps init_state_policy local_policies_def put put_graph_a_def same_actors0)
-    apply (smt (z3) London_def Coastal_def One_nat_def NonCoastal_def delta_simps empty_iff eval eval_graph_a_def ex_graph_def igraph.sel(1) graphI_simps init_state_policy local_policies_def same_actors0)
-     apply (simp add: enables_def)
-    apply (erule bexE)
-       apply (rule_tac x = x in bexI)
-    sorry
-    apply (smt (z3) bex_empty case_prodI2 delta_simps fst_conv init_state_policy insert_iff local_policies_def snd_conv)
-    apply (simp add: move_graph_a_def local_policies_def init_state_policy)
-    apply (smt (z3) all_not_in_conv delta_simps init_state_policy local_policies_def)
-     apply (simp add: enables_def)
-    apply (erule bexE)
-     apply (rule_tac x = x in bexI)
-    apply (smt (z3) Pair_inject bex_empty case_prodE case_prodI2 delta_simps init_state_policy insertE local_policies_def)
-    apply (simp add: get_graph_a_def local_policies_def init_state_policy)
-proof -
-fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: location and ya :: location and G :: igraph and I :: infrastructure and aa :: "char list" and la :: location and I' :: infrastructure and m :: nat and x :: "(actor \<Rightarrow> bool) \<times> action set"
-  assume a1: "G = graphI I"
-  assume a2: "x \<in> delta I (graphI I) la"
-  assume a3: "(l, ya) \<in> gra (graphI I) \<or> (ya, l) \<in> gra (graphI I)"
-  assume a4: "\<forall>a\<in>actors_graph (graphI I). \<forall>l. (\<exists>y. (l, y) \<in> gra (graphI I) \<or> (y, l) \<in> gra (graphI I)) \<longrightarrow> (\<exists>x\<in>delta I (graphI I) l. case x of (p, e) \<Rightarrow> get \<in> e \<and> p (Actor a))"
-  assume a5: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
-  assume a6: "a \<in> actors_graph (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendancce (graphI I)))"
-  assume "I' = Infrastructure (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendance (graphI I))) (delta I)"
-  have f7: "a \<in> {cs. \<exists>l. l \<in> {l. \<exists>la. (l, la) \<in> gra G \<or> (la, l) \<in> gra G} \<and> cs \<in> agra G l}"
-    using a6 a1 by (simp add: actors_graph_def nodes_def)
-  have "\<forall>l cs. \<exists>p. \<forall>la lb. ((l, la) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> p \<in> delta I (graphI I) l) \<and> ((lb, l) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> p \<in> delta I (graphI I) l)"
-    using a4 by blast
-  then obtain pp :: "location \<Rightarrow> char list \<Rightarrow> (actor \<Rightarrow> bool) \<times> action set" where
-    f8: "\<And>l la cs lb. ((l, la) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> pp l cs \<in> delta I (graphI I) l) \<and> ((lb, l) \<notin> gra (graphI I) \<or> cs \<notin> actors_graph (graphI I) \<or> pp l cs \<in> delta I (graphI I) l)"
-    by (metis (no_types))
-  then have f9: "\<And>l la. (l, la) \<notin> gra G \<or> pp la a \<in> delta I G la"
-    using f7 a1 actors_graph_def nodes_def by blast
-  have "\<And>l la. (l, la) \<notin> gra G \<or> pp l a \<in> delta I G l"
-    using f8 f7 a1 actors_graph_def nodes_def by blast
-  then show "x \<in> delta I (Lgraph (gra (graphI I)) (agra (graphI I)) ((dgra (graphI I)) (aa := (fst (dgra (graphI I) aa), fst (snd (dgra (graphI I) aa)), m, snd (snd (snd (dgra (graphI I) aa)))))) (bb (graphI I)) (attendance (graphI I))) l"
-    using f9 a5 a3 a2 a1 by (smt (z3) delta_simps empty_iff init_state_policy local_policies_def)
-qed
-qed
-*)
-
-
-(*
-lemma enables_get: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow> a \<in> actors_graph (graphI y)
-                   \<Longrightarrow> l \<in> nodes (graphI y) \<Longrightarrow>  enables y l (Actor a) get\<close>
-  using enables_get0 by blast
-*)
 
 lemma enables_put0: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
        \<forall> a \<in> actors_graph (graphI y). \<forall> l \<in> nodes (graphI y). enables y l (Actor a) put\<close>
@@ -1003,7 +946,7 @@ lemma same_gra_loc_Ini_ini: \<open>\<forall>l\<in>nodes (graphI Ini).
 
 
 
-text \<open>This formulation does in fact use the precondition as intended. Since we have a HIL-CTL we can
+text \<open>This formulation does in fact use the precondition as intended. Since we have a HOL-CTL we can
 have a CTL formula within another one. Thereby, we can draw the pc1 as a proper precondition in front
 (bound under AG) and have the EF part only after the implication. The following proof is thus
 much simpler because we can assume that the actor is at N3 and has a salary greater than 40K 
@@ -1341,8 +1284,6 @@ next show \<open>Ini \<in> AG {s. pc3 ''Alice'' s \<longrightarrow> s \<in> EF (
            apply (rule sym)
              apply (rule same_nodes)
         apply (simp add: state_transition_infra_def state_transition_refl_def)
-
-      
       apply (subgoal_tac \<open>(delta (Infrastructure (put_graph_a ''ED'' London (graphI y)) (delta y))) = delta y\<close>)
        apply simp
       using delta_simps by blast
@@ -1352,5 +1293,30 @@ qed
 qed
 qed
 
+(* In the same manner we can infer the preconditions pc1 and pc2 *)
+lemma pc1_AG: \<open>\<forall> A \<in> AttendanceScoring_actors. M \<turnstile> AG {s. pc1 A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
+  sorry
+
+lemma pc2_AG: \<open>\<forall> A \<in> AttendanceScoring_actors. M \<turnstile> AG {s. pc2 A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
+  sorry
+
+(* Similar to the disjE rule  \<open>(A \<Longrightarrow> D) \<Longrightarrow> (B \<Longrightarrow> D) \<Longrightarrow> A \<or> B \<Longrightarrow> D \<close>
+   we lift this to pcipI *)
+lemma AG_disjE: \<open>M \<turnstile> AG {s. P1 s \<longrightarrow> s \<in> S} \<Longrightarrow> M \<turnstile> AG {s. P2 s \<longrightarrow> s \<in> S} \<Longrightarrow> M \<turnstile> AG {s. P3 s \<longrightarrow> s \<in> S}
+                \<Longrightarrow> M \<turnstile> AG {s. P1 s \<or> P2 s \<or> P3 s \<longrightarrow> s \<in> S}\<close>
+proof (simp add: M_def Attendance_Kripke_def check_def, erule conjE)
+  show \<open>Ini \<in> AG {s. P2 s \<longrightarrow> s \<in> S} \<Longrightarrow>
+    Ini \<in> AG {s. P3 s \<longrightarrow> s \<in> S} \<Longrightarrow>
+    Ini \<in> Attendance_states \<Longrightarrow>
+    Ini \<in> AG {s. P1 s \<longrightarrow> s \<in> S} \<Longrightarrow> Ini \<in> AG {s. (P1 s \<longrightarrow> s \<in> S) \<and> (P2 s \<longrightarrow> s \<in> S) \<and> (P3 s \<longrightarrow> s \<in> S)}\<close>
+      apply (rule AG_all_sO)
+      apply (rule allI, rule impI)
+    apply (rule CollectI)
+    using AG_all_s' by blast
+qed
+
+lemma pcipI: \<open>\<forall> A \<in> AttendanceScoring_actors. M \<turnstile> AG {s. pcipI A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
+apply (unfold pcipI_def)
+  using AG_disjE pc1_AG pc2_AG pc3_AG by blast
 
 end
