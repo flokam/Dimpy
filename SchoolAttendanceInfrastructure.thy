@@ -180,7 +180,7 @@ move: "\<lbrakk> G = graphI I; a @\<^bsub>G\<^esub> l; l \<in> nodes G; l' \<in>
                   (delta I) \<Longrightarrow>
           I \<rightarrow>\<^sub>n I'" 
 |   eval : "G = graphI I \<Longrightarrow> a @\<^bsub>G\<^esub> l \<Longrightarrow> l \<in> nodes G \<Longrightarrow>
-           c \<in> actors_graph G \<Longrightarrow> 
+           c \<in> actors_graph G \<Longrightarrow> (a, None) \<in> attendance G \<Longrightarrow>
            Actor c \<in> readers (dgra G a) \<or> Actor c = owner (dgra G a) \<Longrightarrow> 
            enables I l (Actor c) eval \<Longrightarrow>
           I' = Infrastructure 
@@ -216,26 +216,88 @@ definition \<open>counterfactuals s P \<equiv> {s''. P s'' \<and> (\<exists> s'.
 lemma delta_invariant: "\<forall> z z'. (z \<rightarrow>\<^sub>n z') \<longrightarrow>  delta(z) = delta(z')"    
   by (clarify, erule state_transition_in.cases, simp+)
 
+declare[[show_types]]
+
 lemma init_state_policy0: 
   assumes "\<forall> z z'. (z \<rightarrow>\<^sub>n z') \<longrightarrow>  delta(z) = delta(z')"
       and "(x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>*"
     shows "delta(x) = delta(y)"
-  sorry
+proof -
+  have ind: "(x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>*
+             \<longrightarrow> delta(x) = delta(y)"
+    by (insert assms, erule rtrancl.induct, simp add: state_transition_infra_def state_transition_refl_def, 
+         simp add: state_transition_infra_def state_transition_refl_def)
+  show ?thesis
+  by (insert ind, insert assms(2), simp)
+qed
 
 lemma init_state_policy: "\<lbrakk> (x,y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<rbrakk> \<Longrightarrow> 
                           delta(x) = delta(y)"  
   by (rule init_state_policy0, rule delta_invariant)
 
 lemma same_nodes0[rule_format]: "\<forall> z z'. z \<rightarrow>\<^sub>n z' \<longrightarrow> nodes(graphI z) = nodes(graphI z')"   
-  sorry
-
+  by (clarify, erule state_transition_in.cases, 
+       (simp add: move_graph_a_def delete_graph_a_def put_graph_a_def eval_graph_a_def atI_def actors_graph_def nodes_def)+)
+ 
 lemma same_nodes: "(I, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* 
                    \<Longrightarrow> nodes(graphI y) = nodes(graphI I)"  
   by (erule rtrancl_induct, rule refl, drule CollectD, simp, drule same_nodes0, simp)  
 
 
 lemma same_actors0[rule_format]: "\<forall> z z'. z \<rightarrow>\<^sub>n z' \<longrightarrow> actors_graph(graphI z) = actors_graph(graphI z')"   
-  sorry
+proof (clarify, erule state_transition_in.cases)
+  show \<open>\<And>(z::infrastructure) (z'::infrastructure) (G::igraph) (I::infrastructure) (a::char list) (l::location)
+       I'::infrastructure.
+       z = I \<Longrightarrow>
+       z' = I' \<Longrightarrow>
+       G = graphI I \<Longrightarrow>
+       a @\<^bsub>G\<^esub> l \<Longrightarrow>
+       l \<in> nodes G \<Longrightarrow>
+       enables I l (Actor a) put \<Longrightarrow>
+       I' = Infrastructure (put_graph_a a l G) (delta I) \<Longrightarrow> actors_graph (graphI z) = actors_graph (graphI z')\<close>
+    by (simp add: actors_graph_def nodes_def put_graph_a_def)
+next show \<open>\<And>(z::infrastructure) (z'::infrastructure) (G::igraph) (I::infrastructure) (a::char list) (l::location)
+       (c::char list) I'::infrastructure.
+       z = I \<Longrightarrow>
+       z' = I' \<Longrightarrow>
+       G = graphI I \<Longrightarrow>
+       a @\<^bsub>G\<^esub> l \<Longrightarrow>
+       l \<in> nodes G \<Longrightarrow>
+       c \<in> actors_graph G \<Longrightarrow>
+       (a, None) \<in> attendance G \<Longrightarrow>
+       Actor c \<in> readers (dgra G a) \<or> Actor c = owner (dgra G a) \<Longrightarrow>
+       enables I l (Actor c) eval \<Longrightarrow>
+       I' = Infrastructure (eval_graph_a a G) (delta I) \<Longrightarrow> actors_graph (graphI z) = actors_graph (graphI z')\<close>
+    by (simp add: actors_graph_def eval_graph_a_def nodes_def)
+next show \<open>\<And>(z::infrastructure) (z'::infrastructure) (G::igraph) (I::infrastructure) (a::char list) (l::location)
+       (l'::location) I'::infrastructure.
+       z = I \<Longrightarrow>
+       z' = I' \<Longrightarrow>
+       G = graphI I \<Longrightarrow>
+       a @\<^bsub>G\<^esub> l \<Longrightarrow>
+       l \<in> nodes G \<Longrightarrow>
+       l' \<in> nodes G \<Longrightarrow>
+       a \<in> actors_graph (graphI I) \<Longrightarrow>
+       enables I l' (Actor a) move \<Longrightarrow>
+       I' = Infrastructure (move_graph_a a l l' G) (delta I) \<Longrightarrow> actors_graph (graphI z) = actors_graph (graphI z')\<close>
+    apply (simp add: actors_graph_def nodes_def move_graph_a_def atI_def, rule impI, rule equalityI)
+    prefer 2
+     apply blast
+    apply (rule subsetI, simp)
+    by metis
+next show \<open>\<And>(z::infrastructure) (z'::infrastructure) (G::igraph) (I::infrastructure) (a::char list) (l::location)
+       (d::disadvantage) I'::infrastructure.
+       z = I \<Longrightarrow>
+       z' = I' \<Longrightarrow>
+       G = graphI I \<Longrightarrow>
+       a @\<^bsub>G\<^esub> l \<Longrightarrow>
+       l \<in> nodes G \<Longrightarrow>
+       a \<in> actors_graph (graphI I) \<Longrightarrow>
+       d \<in> fst (snd (snd (dgra G a))) \<Longrightarrow>
+       enables I l (Actor a) delete \<Longrightarrow>
+       I' = Infrastructure (delete_graph_a a d G) (delta I) \<Longrightarrow> actors_graph (graphI z) = actors_graph (graphI z') \<close>
+    by (simp add: actors_graph_def delete_graph_a_def nodes_def)
+qed
 
 lemma same_actors: "(I, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* 
               \<Longrightarrow> actors_graph(graphI I) = actors_graph(graphI y)"
