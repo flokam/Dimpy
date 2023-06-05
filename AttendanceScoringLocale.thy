@@ -617,104 +617,6 @@ next show \<open>\<And>y z. (Ini, y) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<
          London_def Coastal_def NonCoastal_def, erule exE)
     apply (erule state_transition_in.cases)
     sorry
-(*
-    apply (smt (z3) delta_simps graphI_simps igraph.sel(1) init_state_policy local_policies_def put put_graph_a_def same_actors0)
-    apply (smt (z3) London_def Coastal_def One_nat_def NonCoastal_def delta_simps empty_iff eval eval_graph_a_def ex_graph_def graphI_simps igraph.sel(1) init_state_policy insert_commute local_policies_def same_actors0)
-    apply (simp add: enables_def)
-    apply (erule bexE)
-     apply (rule_tac x = x in bexI)
-proof -
-  fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: location and ya :: location and G :: igraph and I :: infrastructure and aa :: "char list" and la :: location and l' :: location and I' :: infrastructure and x :: "(actor \<Rightarrow> bool) \<times> action set"
-  assume a1: "case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor aa)"
-assume a2: "x \<in> delta I (graphI I) l'"
-  assume a3: "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
-  then have "local_policies (graphI I) l' = {(\<lambda>a. True, {get, move, put, eval})}"
-    sorry
-    using a2 by (metis (no_types) delta_simps empty_iff init_state_policy local_policies_def)
-    then show "case x of (p, A) \<Rightarrow> move \<in> A \<and> p (Actor a)"
-using a3 a2 a1 init_state_policy by fastforce
-next show \<open>\<And>y z a l ya G I aa la l' I' x.
-       (Infrastructure
-         (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_attendance)
-         local_policies,
-        I)
-       \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
-       \<forall>a\<in>actors_graph (graphI I).
-          \<forall>l. (\<exists>y. (l, y) \<in> gra (graphI I) \<or> (y, l) \<in> gra (graphI I)) \<longrightarrow>
-              (\<exists>x\<in>delta I (graphI I) l. case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor a)) \<Longrightarrow>
-       a \<in> actors_graph (move_graph_a aa la l' (graphI I)) \<Longrightarrow>
-       (l, ya) \<in> gra (move_graph_a aa la l' (graphI I)) \<or> (ya, l) \<in> gra (move_graph_a aa la l' (graphI I)) \<Longrightarrow>
-       y = I \<Longrightarrow>
-       z = Infrastructure (move_graph_a aa la l' (graphI I)) (delta I) \<Longrightarrow>
-       G = graphI I \<Longrightarrow>
-       aa @\<^bsub>graphI I\<^esub> la \<Longrightarrow>
-       la \<in> nodes (graphI I) \<Longrightarrow>
-       l' \<in> nodes (graphI I) \<Longrightarrow>
-       aa \<in> actors_graph (graphI I) \<Longrightarrow>
-       I' = Infrastructure (move_graph_a aa la l' (graphI I)) (delta I) \<Longrightarrow>
-       x \<in> delta I (graphI I) l' \<Longrightarrow>
-       case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor aa) \<Longrightarrow> x \<in> delta I (move_graph_a aa la l' (graphI I)) l\<close>
-    apply (simp add: move_graph_a_def local_policies_def init_state_policy)
-    by (smt (z3) delta_simps empty_iff init_state_policy local_policies_def)
-next show \<open>\<And>y z a l ya G I aa la I' m.
-       (Infrastructure
-         (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_attendance)
-         local_policies,
-        y)
-       \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
-       \<forall>a\<in>actors_graph (graphI y).
-          \<forall>l. (\<exists>ya. (l, ya) \<in> gra (graphI y) \<or> (ya, l) \<in> gra (graphI y)) \<longrightarrow>
-              (\<exists>x\<in>delta y (graphI y) l. case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor a)) \<Longrightarrow>
-       a \<in> actors_graph (graphI z) \<Longrightarrow>
-       (l, ya) \<in> gra (graphI z) \<or> (ya, l) \<in> gra (graphI z) \<Longrightarrow>
-       y = I \<Longrightarrow>
-       z = I' \<Longrightarrow>
-       G = graphI I \<Longrightarrow>
-       aa @\<^bsub>G\<^esub> la \<Longrightarrow>
-       la \<in> nodes G \<Longrightarrow>
-       enables I la (Actor aa) get \<Longrightarrow>
-       I' = Infrastructure (get_graph_a aa la m G) (delta I) \<Longrightarrow>
-       \<exists>x\<in>delta z (graphI z) l. case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor a) \<close>
-     apply (simp add: enables_def)
-    apply (erule bexE)
-     apply (rule_tac x = x in bexI)
-proof -
-fix yb :: infrastructure and z :: infrastructure and a :: "char list" and l :: location and ya :: location and G :: igraph and I :: infrastructure and aa :: "char list" and la :: location and I' :: infrastructure and m :: nat and x :: "(actor \<Rightarrow> bool) \<times> action set"
-  assume "G = graphI I"
-  assume a1: "x \<in> delta I (graphI I) la"
-assume "(Infrastructure (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass ex_data black_box ex_attendance) local_policies, I) \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>*"
-  then have f2: "delta I = local_policies"
-    by (smt (z3) delta_simps init_state_policy)
-  have "\<forall>p pa. \<exists>paa A. ((case p of (x::actor \<Rightarrow> bool, xa::action set) \<Rightarrow> pa x xa) \<or> (paa, A) = p) \<and> (\<not> pa paa A \<or> (case p of (x, xa) \<Rightarrow> pa x xa))"
-  by auto
-then show "case x of (p, A) \<Rightarrow> move \<in> A \<and> p (Actor a)"
-  using f2 a1 by (smt (z3) empty_iff fst_conv insertI1 insert_iff local_policies_def snd_conv)
-next show \<open>\<And>y z a l ya G I aa la I' m x.
-       (Infrastructure
-         (Lgraph {(Location 0, Location (Suc 0)), (Location 0, Location 2), (Location (Suc 0), Location 2)} ex_loc_ass
-           ex_data black_box ex_attendance)
-         local_policies,
-        I)
-       \<in> {(x, y). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow>
-       \<forall>a\<in>actors_graph (graphI I).
-          \<forall>l. (\<exists>ya. (l, ya) \<in> gra (graphI I) \<or> (ya, l) \<in> gra (graphI I)) \<longrightarrow>
-              (\<exists>x\<in>delta I (graphI I) l. case x of (p, e) \<Rightarrow> move \<in> e \<and> p (Actor a)) \<Longrightarrow>
-       a \<in> actors_graph (get_graph_a aa la m (graphI I)) \<Longrightarrow>
-       (l, ya) \<in> gra (get_graph_a aa la m (graphI I)) \<or> (ya, l) \<in> gra (get_graph_a aa la m (graphI I)) \<Longrightarrow>
-       y = I \<Longrightarrow>
-       z = Infrastructure (get_graph_a aa la m (graphI I)) (delta I) \<Longrightarrow>
-       G = graphI I \<Longrightarrow>
-       aa @\<^bsub>graphI I\<^esub> la \<Longrightarrow>
-       la \<in> nodes (graphI I) \<Longrightarrow>
-       I' = Infrastructure (get_graph_a aa la m (graphI I)) (delta I) \<Longrightarrow>
-       x \<in> delta I (graphI I) la \<Longrightarrow>
-       case x of (p, e) \<Rightarrow> get \<in> e \<and> p (Actor aa) \<Longrightarrow> x \<in> delta I (get_graph_a aa la m (graphI I)) l \<close>
-    apply (simp add: get_graph_a_def init_state_policy local_policies_def actors_graph_def atI_def, erule exE)
-    by (smt (z3) delta_simps empty_iff init_state_policy local_policies_def)
-qed
-*)
 qed
 
 lemma enables_move: \<open>(Ini, y) \<in> {(x::infrastructure, y::infrastructure). x \<rightarrow>\<^sub>n y}\<^sup>* \<Longrightarrow> a \<in> actors_graph (graphI y)
@@ -1997,5 +1899,21 @@ qed
 lemma pcipI: \<open>\<forall> A \<in> AttendanceScoring_actors. M \<turnstile> AG {s. pcipI A s \<longrightarrow> s \<in> EF{x. DO A x}}\<close>
 apply (unfold pcipI_def)
   using AG_disjE pc1_AG pc2_AG pc3_AG by blast
+
+(* Something about bias: if we can derive that the precondition holds always then we know that
+   everyone can reach the DO *)
+lemma PCR_simp0: \<open>M \<turnstile> AG {s. P s \<longrightarrow> s \<in> EF{x. Q x}} \<Longrightarrow>  M \<turnstile> AG {x. P x} \<Longrightarrow> M \<turnstile> AG (EF{x. Q x})\<close>
+  apply (simp add: M_def Attendance_Kripke_def check_def)
+  apply (erule conjE)
+      apply (rule AG_all_sO)
+      apply (rule allI, rule impI)
+  apply (frule AG_all_s, assumption)
+  apply (rotate_tac 2)
+  apply (frule AG_all_s', assumption)
+  apply (drule CollectD)
+  apply (erule mp)
+  using AG_all_s' by blast
+
+
 
 end
